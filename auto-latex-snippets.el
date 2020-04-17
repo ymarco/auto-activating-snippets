@@ -19,6 +19,8 @@
 ;;
 ;;; Code:
 
+(require 'texmathp)
+
 (defun als--create-expansion (key expansion &optional condition)
   "TODO."
   (if (functionp condition)
@@ -31,7 +33,9 @@
              (lambda () (interactive)
                (when (funcall condition)
                  (delete-char (- (length key)))
-                 (funcall expansion)))))
+                 (funcall expansion))))
+            (t
+             (error "Expantion must be either a string or function")))
     (cond
      ((stringp expansion)
       (lambda () (interactive)
@@ -109,7 +113,7 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ;; ("a."       . "\\dot{a}")
        ;; ("a.."      . "\\ddot{a}")
        ;; ("...\\)a"  . "...\\) a")
-       ("\\\\\\" "\\setminus")
+       ("\\\\\\" . "\\setminus")
        ("pmat"     . "pmatrix")
        ("part"     . "\\frac{\\partial }{\\partial }")
        ;; ("sq"       . "\\sqrt{}")
