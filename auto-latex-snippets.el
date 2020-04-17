@@ -138,8 +138,8 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
   "TODO."
   :init-value nil
   (if auto-latex-snippets-mode
-      (add-hook 'post-self-insert-hook #'als-post-self-insert-hook)
-    (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook)))
+      (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
+    (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook t)))
 
 (provide 'auto-latex-snippets)
 ;;; auto-latex-snippets.el ends here
