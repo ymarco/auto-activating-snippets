@@ -58,12 +58,12 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
     (als-set-expanding-ligatures
      keymap
      '(
-       ("a1"       . "a_1")
-       ("a_11"     . "a_{11}")
-       ("a"        . "^ a^")
-       ("a^11"     . "a^{11}")
-       ("a+"       . "a +")
-       ("a"        . "+b a + b")
+       ;; ("a1"       . "a_1")
+       ;; ("a_11"     . "a_{11}")
+       ;; ("a"        . "^ a^")
+       ;; ("a^11"     . "a^{11}")
+       ;; ("a+"       . "a +")
+       ;; ("a"        . "+b a + b")
        ("..."      . "\\dots")
        ("=>"       . "`\\implies")
        ("=<"       . "\\impliedby")
@@ -102,7 +102,7 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ("cb"       . "^3")
        ("EE"       . "\\exists")
        ("AA"       . "\\forall")
-       ("aii"      . "a_i")
+       ;; ("aii"      . "a_i")
        ;; ("aip1"     . "a_{i+1}")
        ;; ("set"      . "\\{ \\}")
        ("||"       . "\\mid")
