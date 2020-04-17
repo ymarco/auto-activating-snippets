@@ -23,30 +23,33 @@
 
 (defun als--create-expansion (key expansion &optional condition)
   "TODO."
-  (if (functionp condition)
-      (cond ((stringp expansion)
-             (lambda () (interactive)
-               (when (funcall condition)
-                 (delete-char (- (length key)))
-                 (insert expansion))))
-            ((functionp expansion)
-             (lambda () (interactive)
-               (when (funcall condition)
-                 (delete-char (- (length key)))
-                 (funcall expansion))))
-            (t
-             (error "Expantion must be either a string or function")))
-    (cond
-     ((stringp expansion)
-      (lambda () (interactive)
-        (delete-char (- (length key)))
-        (insert expansion)))
-     ((functionp expansion)
-      (lambda () (interactive)
-        (delete-char (- (length key)))
-        (funcall expansion)))
-     (t
-      (error "Expantion must be either a string or function")))))
+  (cond ((functionp condition)
+         (cond ((stringp expansion)
+                (lambda () (interactive)
+                  (when (funcall condition)
+                    (delete-char (- (length key)))
+                    (insert expansion))))
+               ((functionp expansion)
+                (lambda () (interactive)
+                  (when (funcall condition)
+                    (delete-char (- (length key)))
+                    (funcall expansion))))
+               (t
+                (error "Expantion must be either a string or function"))))
+        ((null condition)
+         (cond
+          ((stringp expansion)
+           (lambda () (interactive)
+             (delete-char (- (length key)))
+             (insert expansion)))
+          ((functionp expansion)
+           (lambda () (interactive)
+             (delete-char (- (length key)))
+             (funcall expansion)))
+          (t
+           (error "Expantion must be either a string or function"))))
+        (t
+         (error "Condition must either be a function or nil"))))
 
 (defun als-make-prefix-map (keymap key expansion condition)
   "Bind KEY as extended prefix in KEYMAP to EXPANTION.
