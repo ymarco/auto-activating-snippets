@@ -72,6 +72,26 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
      keymap (car key-expansion) (cdr key-expansion)
      condition)))
 
+(defun als-insert-subscript ()
+  "TODO."
+  (insert "_" (this-command-keys)))
+
+(defun als-auto-index-condition ()
+  "TODO."
+  (save-excursion
+    (backward-char) ;; back from the trigger
+    (and
+     ;; Before is some indexable char
+     (or (<= ?a (char-before) ?z)
+         (<= ?A (char-before) ?Z))
+     ;; Not a macro
+     (not (save-excursion
+            (and (search-backward "\\" (line-beginning-position) t)
+                 (looking-at "\\\\[a-zA-Z0-9*@]+")
+                 (<= (match-beginning 0) (point) (match-end 0)))))
+     ;; Inside math
+     (texmathp))))
+
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
     (als-set-expanding-ligatures
@@ -132,6 +152,19 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ("-+"       . "\\mp")
        ;; ("nCr"      . "\\binom{n}{r}")
        ))
+
+    (als-set-expanding-ligatures
+     keymap #'als-insert-subscript-condition
+     '(("0" . als-insert-subscript)
+       ("1" . als-insert-subscript)
+       ("2" . als-insert-subscript)
+       ("3" . als-insert-subscript)
+       ("4" . als-insert-subscript)
+       ("5" . als-insert-subscript)
+       ("6" . als-insert-subscript)
+       ("7" . als-insert-subscript)
+       ("8" . als-insert-subscript)
+       ("9" . als-insert-subscript)))
     keymap)
   "TODO.")
 
