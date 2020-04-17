@@ -19,8 +19,32 @@
 ;;
 ;;; Code:
 
+(defun als--create-expansion (key expansion &optional condition)
+  "TODO."
+  (if (functionp condition)
+      (cond ((stringp expansion)
+             (lambda () (interactive)
+               (when (funcall condition)
+                 (delete-char (- (length key)))
+                 (insert expansion))))
+            ((functionp expansion)
+             (lambda () (interactive)
+               (when (funcall condition)
+                 (delete-char (- (length key)))
+                 (funcall expansion)))))
+    (cond
+     ((stringp expansion)
+      (lambda () (interactive)
+        (delete-char (- (length key)))
+        (insert expansion)))
+     ((functionp expansion)
+      (lambda () (interactive)
+        (delete-char (- (length key)))
+        (funcall expansion)))
+     (t
+      (error "Expantion must be either a string or function")))))
 
-(defun als-make-prefix-map (keymap key expansion)
+(defun als-make-prefix-map (keymap key expansion condition)
   "Bind KEY as extended prefix in KEYMAP to EXPANTION.
 
 EXPANTION must either be a string or function."
@@ -31,32 +55,23 @@ EXPANTION must either be a string or function."
                              (define-key keymap (string c) (make-sparse-keymap)))))
           incomplete-key)
     (define-key keymap (substring key -1)
-      (cond ((stringp expansion)
-             (lambda () (interactive)
-               (delete-char (- (length key)))
-               (insert expansion)))
-            ((functionp expansion)
-             expansion)
-            (t
-             (error "Expantion must be either a string or function"))))
+      (als--create-expansion key expansion condition))
     orig-keymap))
 
-(defun als-set-expanding-ligatures (keymap key-expantions)
+(defun als-set-expanding-ligatures (keymap condition key-expantions)
   "Set multiple expantions for `als-set-expanding-ligature'.
 
 KEYMAP is passed to `als-set-expanding-ligature', and
 KEY-EXPANTIONS should be an alist of (key . expantion)."
   (dolist (key-expansion key-expantions)
-    (als-make-prefix-map keymap
-                         (car key-expansion)
-                         (cdr key-expansion))))
-
-
+    (als-make-prefix-map
+     keymap (car key-expansion) (cdr key-expansion)
+     condition)))
 
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
     (als-set-expanding-ligatures
-     keymap
+     keymap #'texmathp
      '(
        ;; ("a1"       . "a_1")
        ;; ("a_11"     . "a_{11}")
@@ -125,13 +140,11 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
     (setq als-current-prefix-map
           (cond ((null k)
                  als-prefix-map)
+                ((keymapp k)
+                 k)
                 ((functionp k)
                  (funcall k)
-                 als-prefix-map)
-                (t ;; (keymapp k)
-                 k)))))
-
-
+                 als-prefix-map)))))
 
 ;;;###autoload
 (define-minor-mode auto-latex-snippets-mode
