@@ -154,7 +154,7 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ))
 
     (als-set-expanding-ligatures
-     keymap #'als-insert-subscript-condition
+     keymap #'als-auto-index-condition
      '(("0" . als-insert-subscript)
        ("1" . als-insert-subscript)
        ("2" . als-insert-subscript)
