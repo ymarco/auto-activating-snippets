@@ -96,11 +96,10 @@ For examples see the definition of `als-prefix-map'.
    (or (<= ?a (char-before) ?z)
        (<= ?A (char-before) ?Z))
    ;; Not a macro
-   (not (let ((orig-point (point)))
-          (and (search-backward "\\" (line-beginning-position) t)
-               (looking-at "\\\\[a-zA-Z0-9*@]+")
-               (goto-char orig-point)
-               (<= (match-beginning 0) (point) (match-end 0)))))
+   (not (and (save-excursion
+               (and (search-backward "\\" (line-beginning-position) t)
+                    (looking-at "\\\\[a-zA-Z0-9*@]+")))
+             (<= (match-beginning 0) (point) (match-end 0))))
    ;; Inside math
    (texmathp)))
 
