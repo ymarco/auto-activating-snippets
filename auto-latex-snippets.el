@@ -114,11 +114,9 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ("<<"       . "\\ll")
        ("xx"       . "\\times")
        ("**"       . "\\cdot")
-       ("to"       . "\\to")
        ("->"       . "\\to")
        ("|->"      . "\\mapsto")
        ("!>"       . "\\mapsto")
-       ("sin"      . "\\sin")
        ;; ("v,."      . "\\vec{v}")
        ;; ("abar"     . "\\overline{a}")
        ;; ("ahat"     . "\\hat{a}")
@@ -127,7 +125,7 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ;; ("a.."      . "\\ddot{a}")
        ;; ("...\\)a"  . "...\\) a")
        ("\\\\\\" . "\\setminus")
-       ("pmat"     . "pmatrix")
+       ;; ("pmat"     . "pmatrix")
        ("part"     . "\\frac{\\partial }{\\partial }")
        ;; ("sq"       . "\\sqrt{}")
        ("sr"       . "^2")
@@ -139,13 +137,18 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ;; ("set"      . "\\{ \\}")
        ("||"       . "\\mid")
        ("<>"       . "\\diamond")
-       ("case"     . "cases env.")
+       ;; ("case"     . "cases env.")
        ;; ("st"       . "\\text{s.t.}")
        ("+-"       . "\\pm")
        ("-+"       . "\\mp")
        ;; ("nCr"      . "\\binom{n}{r}")
        ))
 
+    (als-set-expanding-ligatures
+     keymap #'texmathp
+     (mapcar (lambda (m) (cons m (concat "\\" m)))
+             '("to" "sin" "cos" "arccot" "cot" "csc" "ln" "log" "exp" "star" "perp"
+               "arcsin" "arccos" "arctan" "arccot" "arccsc" "arcsec" "int")))
     (als-set-expanding-ligatures
      keymap #'als-auto-index-condition
      '(("0" . als-insert-subscript)
