@@ -24,8 +24,14 @@
 (defun als-expand-snippet (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
-When CONDITION is a function, "
-  (when (or (null condition) (funcall condition))
+When CONDITION is a function, call it and do not expand if
+returned nil."
+  (when (or (null condition)
+            (let (returned)
+              (backward-char (length key))
+              (setq returned (funcall condition))
+              (forward-char (length key))
+              returned))
     (delete-char (- (length key)))
     (if (functionp expansion)
         (funcall expansion)
@@ -67,19 +73,17 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
 
 (defun als-auto-index-condition ()
   "TODO."
-  (save-excursion
-    (backward-char) ;; back from the trigger
-    (and
-     ;; Before is some indexable char
-     (or (<= ?a (char-before) ?z)
-         (<= ?A (char-before) ?Z))
-     ;; Not a macro
-     (not (save-excursion
-            (and (search-backward "\\" (line-beginning-position) t)
-                 (looking-at "\\\\[a-zA-Z0-9*@]+")
-                 (<= (match-beginning 0) (point) (match-end 0)))))
-     ;; Inside math
-     (texmathp))))
+  (and
+   ;; Before is some indexable char
+   (or (<= ?a (char-before) ?z)
+       (<= ?A (char-before) ?Z))
+   ;; Not a macro
+   (not (save-excursion
+          (and (search-backward "\\" (line-beginning-position) t)
+               (looking-at "\\\\[a-zA-Z0-9*@]+")
+               (<= (match-beginning 0) (point) (match-end 0)))))
+   ;; Inside math
+   (texmathp)))
 
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
