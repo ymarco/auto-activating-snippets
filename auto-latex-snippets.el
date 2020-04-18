@@ -21,40 +21,26 @@
 
 (require 'texmathp)
 
-(defun als--create-expansion (key expansion &optional condition)
-  "TODO."
-  (cond ((functionp condition)
-         (cond ((stringp expansion)
-                (lambda () (interactive)
-                  (when (funcall condition)
-                    (delete-char (- (length key)))
-                    (insert expansion))))
-               ((functionp expansion)
-                (lambda () (interactive)
-                  (when (funcall condition)
-                    (delete-char (- (length key)))
-                    (funcall expansion))))
-               (t
-                (error "Expantion must be either a string or function"))))
-        ((null condition)
-         (cond
-          ((stringp expansion)
-           (lambda () (interactive)
-             (delete-char (- (length key)))
-             (insert expansion)))
-          ((functionp expansion)
-           (lambda () (interactive)
-             (delete-char (- (length key)))
-             (funcall expansion)))
-          (t
-           (error "Expantion must be either a string or function"))))
-        (t
-         (error "Condition must either be a function or nil"))))
+(defun als-expand-snippet (key expansion &optional condition)
+  "Expand snippet with KEY as EXPANSION.
+
+When CONDITION is a function, "
+  (when (or (null condition) (funcall condition))
+    (delete-char (- (length key)))
+    (if (functionp expansion)
+        (funcall expansion)
+      (insert expansion))))
+
 
 (defun als-make-prefix-map (keymap key expansion condition)
   "Bind KEY as extended prefix in KEYMAP to EXPANTION.
 
 EXPANTION must either be a string or function."
+  (unless (or (stringp expansion) (functionp expansion))
+    (error "Expansion must be either a string or function"))
+  (unless (or (null condition) (functionp condition))
+    (error "Condition must be either a string or function"))
+
   (let ((incomplete-key (substring key 0 -1))
         (orig-keymap keymap))
     (mapc (lambda (c)
@@ -62,7 +48,7 @@ EXPANTION must either be a string or function."
                              (define-key keymap (string c) (make-sparse-keymap)))))
           incomplete-key)
     (define-key keymap (substring key -1)
-      (als--create-expansion key expansion condition))
+      (lambda () (als-expand-snippet key expansion condition)))
     orig-keymap))
 
 (defun als-set-expanding-ligatures (keymap condition key-expantions)
