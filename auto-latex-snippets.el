@@ -57,16 +57,33 @@ EXPANTION must either be a string or function."
       (lambda () (als-expand-snippet key expansion condition)))
     orig-keymap))
 
-(defun als-set-expanding-ligatures (keymap condition key-expantions)
-  "Set multiple expantions for `als-set-expanding-ligature'.
+(defun als-set-expanding-ligatures (keymap &rest rest)
+  "Set multiple KEY-EXPANSIONS on KEYMAP for `als-set-expanding-ligature'.
 
-KEYMAP is passed to `als-set-expanding-ligature', and
-CONDITION is the condition applied to all of the KEY-EXPANTIONS,
-which should be an alist of (key . expantion)."
-  (dolist (key-expansion key-expantions)
-    (als-make-prefix-map
-     keymap (car key-expansion) (cdr key-expansion)
-     condition)))
+Return the keymap.
+
+The following keywords are avaliable:
+  :cond CONDITION         set the condition for the the following snippets
+  :cond-desc DESCRIPTION  set the description of the previous declared condition
+  :desc                   set the description for the following snippet
+
+For examples see the definition of `als-prefix-map'.
+
+\(fn KEYMAP [:desc :cond :cond-desc] KEY-EXPANSIONS)"
+  (let (item desc cond cond-desc)
+    (while rest
+      (setq item (pop rest))
+      (if (keywordp item)
+          (pcase item
+            (:desc      (setq desc      (pop rest)))
+            (:cond      (setq cond      (pop rest)))
+            (:cond-desc (setq cond-desc (pop rest)))
+            (_ (error "Unknown keyword: %s" item)))
+        ;; regular key-expansion
+        (let ((key item)
+              (expansion (pop rest)))
+          (message "setting %s %s" key expansion)
+          (als-make-prefix-map keymap key expansion cond))))))
 
 (defun als-insert-subscript ()
   "Expansion function used for auto-subscript snippets."
@@ -90,79 +107,88 @@ which should be an alist of (key . expantion)."
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
     (als-set-expanding-ligatures
-     keymap #'texmathp
-     '(
-       ;; ("a1"       . "a_1")
-       ;; ("a_11"     . "a_{11}")
-       ;; ("a"        . "^ a^")
-       ;; ("a^11"     . "a^{11}")
-       ;; ("a+"       . "a +")
-       ;; ("a"        . "+b a + b")
-       ("..."      . "\\dots")
-       ("=>"       . "`\\implies")
-       ("=<"       . "\\impliedby")
-       ;; ("//"       . "\\frac{}{}")
-       ;; (".../"     . "\\frac{...}{}")
-       ("iff"      . "\\iff")
-       ("inn"      . "\\in")
-       ("notin"    . "\\not\\in")
-       ("!="       . "\\neq")
-       ("=="       . "&=")
-       ("~="       . "\\approx")
-       ("~~"       . "\\sim")
-       (">="       . "\\geq")
-       ("<="       . "\\leq")
-       (">>"       . "\\gg")
-       ("<<"       . "\\ll")
-       ("xx"       . "\\times")
-       ("**"       . "\\cdot")
-       ("->"       . "\\to")
-       ("|->"      . "\\mapsto")
-       ("!>"       . "\\mapsto")
-       ;; ("v,."      . "\\vec{v}")
-       ;; ("abar"     . "\\overline{a}")
-       ;; ("ahat"     . "\\hat{a}")
-       ;; ("a~"       . "\\tilde{a}")
-       ;; ("a."       . "\\dot{a}")
-       ;; ("a.."      . "\\ddot{a}")
-       ;; ("...\\)a"  . "...\\) a")
-       ("\\\\\\" . "\\setminus")
-       ;; ("pmat"     . "pmatrix")
-       ("part"     . "\\frac{\\partial }{\\partial }")
-       ;; ("sq"       . "\\sqrt{}")
-       ("sr"       . "^2")
-       ("cb"       . "^3")
-       ("EE"       . "\\exists")
-       ("AA"       . "\\forall")
-       ;; ("aii"      . "a_i")
-       ;; ("aip1"     . "a_{i+1}")
-       ;; ("set"      . "\\{ \\}")
-       ("||"       . "\\mid")
-       ("<>"       . "\\diamond")
-       ;; ("case"     . "cases env.")
-       ;; ("st"       . "\\text{s.t.}")
-       ("+-"       . "\\pm")
-       ("-+"       . "\\mp")
-       ;; ("nCr"      . "\\binom{n}{r}")
-       ))
+     keymap
+     :cond #'texmathp
+     "!=" 	"\\neq"
+     "!>" 	"\\mapsto"
+     "**" 	"\\cdot"
+     "+-" 	"\\pm"
+     "-+" 	"\\mp"
+     "->" 	"\\to"
+     "..." 	"\\dots"
+     "<<" 	"\\ll"
+     "<=" 	"\\leq"
+     "<>" 	"\\diamond"
+     "=<" 	"\\impliedby"
+     "==" 	"&="
+     "=>" 	"`\\implies"
+     ">=" 	"\\geq"
+     ">>" 	"\\gg"
+     "AA" 	"\\forall"
+     "EE" 	"\\exists"
+     "aii" 	"a_i"
+     "aip1" 	"a_{i+1}"
+     "cb" 	"^3"
+     "iff" 	"\\iff"
+     "inn" 	"\\in"
+     "notin" 	"\\not\\in"
+     "sr" 	"^2"
+     ;; "to" 	"\\to"
+     "xx" 	"\\times"
+     "|->" 	"\\mapsto"
+     "||" 	"\\mid"
+     "~=" 	"\\approx"
+     "~~" 	"\\sim"
+     ;; ".../" 	"\\frac{...}{}"
+     ;; "...\\)a" 	"...\\) a"
+     ;; "//" 	"\\frac{}{}"
+     ;; "a" "+b 	a + b"
+     ;; "a" "^ 	a^"
+     ;; "a+" 	"a +"
+     ;; "a." 	"\\dot{a}"
+     ;; "a.." 	"\\ddot{a}"
+     ;; "a^11" 	"a^{11}"
+     ;; "a_11" 	"a_{11}"
+     ;; "abar" 	"\\overline{a}"
+     ;; "ahat" 	"\\hat{a}"
+     ;; "a~" 	"\\tilde{a}"
+     ;; "case" 	"cases env."
+     ;; "part" 	"\\frac{\\partial }{\\partial }"
+     ;; "pmat" 	"pmatrix"
+     ;; "set" 	"\\{ \\}"
+     ;; "sq" 	"\\sqrt{}"
+     ;; "st" 	"\\text{s.t.}"
+     ;; "v,." 	"\\vec{v}"
+     ;;"\\\\\\"\\" 	"\\setminus"
 
-    (als-set-expanding-ligatures
-     keymap #'texmathp
-     (mapcar (lambda (m) (cons m (concat "\\" m)))
-             '("to" "sin" "cos" "arccot" "cot" "csc" "ln" "log" "exp" "star" "perp"
-               "arcsin" "arccos" "arctan" "arccot" "arccsc" "arcsec")))
-    (als-set-expanding-ligatures
-     keymap #'als-auto-index-condition
-     '(("0" . als-insert-subscript)
-       ("1" . als-insert-subscript)
-       ("2" . als-insert-subscript)
-       ("3" . als-insert-subscript)
-       ("4" . als-insert-subscript)
-       ("5" . als-insert-subscript)
-       ("6" . als-insert-subscript)
-       ("7" . als-insert-subscript)
-       ("8" . als-insert-subscript)
-       ("9" . als-insert-subscript)))
+     "arccos"  "\\arccos"
+     "arccot"  "\\arccot"
+     "arccot"  "\\arccot"
+     "arccsc"  "\\arccsc"
+     "arcsec"  "\\arcsec"
+     "arcsin"  "\\arcsin"
+     "arctan"  "\\arctan"
+     "cos"  "\\cos"
+     "cot"  "\\cot"
+     "csc"  "\\csc"
+     "exp"  "\\exp"
+     "ln"  "\\ln"
+     "log"  "\\log"
+     "perp"  "\\perp"
+     "sin"  "\\sin"
+     "star"  "\\star"
+     "to"  "\\to"
+     :cond #'als-auto-index-condition
+     "0"  #'als-insert-subscript
+     "1"  #'als-insert-subscript
+     "2"  #'als-insert-subscript
+     "3"  #'als-insert-subscript
+     "4"  #'als-insert-subscript
+     "5"  #'als-insert-subscript
+     "6"  #'als-insert-subscript
+     "7"  #'als-insert-subscript
+     "8"  #'als-insert-subscript
+     "9"  #'als-insert-subscript)
     keymap)
   "Defalut snippet keymap.")
 
