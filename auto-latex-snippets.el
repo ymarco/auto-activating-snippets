@@ -61,18 +61,19 @@ EXPANTION must either be a string or function."
   "Set multiple expantions for `als-set-expanding-ligature'.
 
 KEYMAP is passed to `als-set-expanding-ligature', and
-KEY-EXPANTIONS should be an alist of (key . expantion)."
+CONDITION is the condition applied to all of the KEY-EXPANTIONS,
+which should be an alist of (key . expantion)."
   (dolist (key-expansion key-expantions)
     (als-make-prefix-map
      keymap (car key-expansion) (cdr key-expansion)
      condition)))
 
 (defun als-insert-subscript ()
-  "TODO."
+  "Expansion function used for auto-subscript snippets."
   (insert "_" (this-command-keys)))
 
 (defun als-auto-index-condition ()
-  "TODO."
+  "Condition usef for auto-subscript snippets."
   (and
    ;; Before is some indexable char
    (or (<= ?a (char-before) ?z)
@@ -162,13 +163,17 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
        ("8" . als-insert-subscript)
        ("9" . als-insert-subscript)))
     keymap)
-  "TODO.")
+  "Defalut snippet keymap.")
 
 (defvar als-current-prefix-map als-prefix-map
-  "TODO.")
+  "Global variable to keep track of the current user path trace of snippets.
+
+Gets updated by `als-post-self-insert-hook'.")
 
 (defun als-post-self-insert-hook ()
-  "TODO."
+  "The `post-self-insert-hook' used to keey track of the user path to snippets.
+
+The path is kept in `als-current-prefix-map'."
   (let ((k (lookup-key als-current-prefix-map (this-command-keys))))
     (setq als-current-prefix-map
           (cond ((null k)
@@ -181,7 +186,9 @@ KEY-EXPANTIONS should be an alist of (key . expantion)."
 
 ;;;###autoload
 (define-minor-mode auto-latex-snippets-mode
-  "TODO."
+  "Minor mode for dynamically auto-expanding LaTeX snippets.
+
+See TODO for the availible snippets."
   :init-value nil
   (if auto-latex-snippets-mode
       (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
