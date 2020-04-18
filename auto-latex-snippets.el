@@ -149,7 +149,7 @@ which should be an alist of (key . expantion)."
      keymap #'texmathp
      (mapcar (lambda (m) (cons m (concat "\\" m)))
              '("to" "sin" "cos" "arccot" "cot" "csc" "ln" "log" "exp" "star" "perp"
-               "arcsin" "arccos" "arctan" "arccot" "arccsc" "arcsec" "int")))
+               "arcsin" "arccos" "arctan" "arccot" "arccsc" "arcsec")))
     (als-set-expanding-ligatures
      keymap #'als-auto-index-condition
      '(("0" . als-insert-subscript)
