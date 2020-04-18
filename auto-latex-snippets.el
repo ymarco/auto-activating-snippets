@@ -8,7 +8,7 @@
 ;; Modified: April 17, 2020
 ;; Version: 0.0.1
 ;; Keywords:
-;; Homepage: https://github.com/yoavm448/auto-latex-snippets
+;; Homepage: https://github.com/tecosaur/auto-latex-snippets
 ;; Package-Requires: ((emacs 27.0.90) (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
