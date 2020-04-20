@@ -210,6 +210,12 @@ The path is kept in `als-current-prefix-map'."
                  (funcall k)
                  als-prefix-map)))))
 
+(defun als-reset-state ()
+  "Reset snippet state.
+
+Useful for tightening conditions for all snippets, to minimize accidental triggering."
+  (setq als-current-prefix-map als-prefix-map))
+
 ;;;###autoload
 (define-minor-mode auto-latex-snippets-mode
   "Minor mode for dynamically auto-expanding LaTeX snippets.
@@ -217,7 +223,9 @@ The path is kept in `als-current-prefix-map'."
 See TODO for the availible snippets."
   :init-value nil
   (if auto-latex-snippets-mode
-      (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
+      (progn
+        (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
+        (add-hook 'yas-before-expand-snippet-hook #'als-reset-state 0 t))
     (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook t)))
 
 (provide 'auto-latex-snippets)
