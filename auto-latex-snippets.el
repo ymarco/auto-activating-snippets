@@ -120,7 +120,7 @@ For examples see the definition of `als-prefix-map'.
      "<>" 	"\\diamond"
      "=<" 	"\\impliedby"
      "==" 	"&="
-     "=>" 	"`\\implies"
+     "=>" 	"\\implies"
      ">=" 	"\\geq"
      ">>" 	"\\gg"
      "AA" 	"\\forall"
@@ -132,7 +132,6 @@ For examples see the definition of `als-prefix-map'.
      "inn" 	"\\in"
      "notin" 	"\\not\\in"
      "sr" 	"^2"
-     ;; "to" 	"\\to"
      "xx" 	"\\times"
      "|->" 	"\\mapsto"
      "||" 	"\\mid"
@@ -176,7 +175,7 @@ For examples see the definition of `als-prefix-map'.
      "perp"  "\\perp"
      "sin"  "\\sin"
      "star"  "\\star"
-     "to"  "\\to"
+     ;; "to"  "\\to"
      :cond #'als-auto-index-condition
      "0"  #'als-insert-subscript
      "1"  #'als-insert-subscript
