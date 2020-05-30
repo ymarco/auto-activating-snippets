@@ -26,12 +26,15 @@
 
 When CONDITION is a function, call it and do not expand if
 returned nil."
-  (when (or (null condition)
-            (let (returned)
-              (backward-char (length key))
-              (setq returned (funcall condition))
-              (forward-char (length key))
-              returned))
+  (when (and
+         (save-excursion
+           (search-backward key (- (point) (length key)) t))
+         (or (null condition)
+             (let (returned)
+               (backward-char (length key))
+               (setq returned (funcall condition))
+               (forward-char (length key))
+               returned)))
     (delete-char (- (length key)))
     (if (functionp expansion)
         (funcall expansion)
@@ -82,7 +85,6 @@ For examples see the definition of `als-prefix-map'.
         ;; regular key-expansion
         (let ((key item)
               (expansion (pop rest)))
-          (message "setting %s %s" key expansion)
           (als-make-prefix-map keymap key expansion cond))))))
 
 (defun als-insert-subscript ()
