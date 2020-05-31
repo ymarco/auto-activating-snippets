@@ -21,6 +21,11 @@
 
 (require 'texmathp)
 
+(defvar als-pre-snippet-expand-hook nil
+  "Hooks to run just before expanding snippets.")
+(defvar als-post-snippet-expand-hook nil
+  "Hooks to run just after expanding snippets.")
+
 (defun als-expand-snippet-maybe (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
@@ -40,9 +45,11 @@ EXPANTION is called interactively, and CONDITION non-interactively."
                (forward-char (length key))
                returned)))
     (delete-char (- (length key)))
+    (run-hooks als-pre-snippet-expand-hook)
     (if (functionp expansion)
         (call-interactively expansion)
-      (insert expansion))))
+      (insert expansion)
+    (run-hooks als-pre-snippet-expand-hook))))
 
 
 (defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
