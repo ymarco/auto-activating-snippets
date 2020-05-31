@@ -197,30 +197,44 @@ For examples see the definition of `als-prefix-map'.
     keymap)
   "Defalut snippet keymap.")
 
-(defvar als-current-prefix-map als-prefix-map
+(defvar-local als-current-prefix-maps nil
   "Global variable to keep track of the current user path trace of snippets.
 
 Gets updated by `als-post-self-insert-hook'.")
 
 (defun als-post-self-insert-hook ()
-  "The `post-self-insert-hook' used to keey track of the user path to snippets.
+  "TODO."
+  (push als-prefix-map als-current-prefix-maps)
+  (let ((current-map-sublist als-current-prefix-maps)
+        current-map
+        key-result
+        prev)
+    (while current-map-sublist
+      (setq current-map (car current-map-sublist))
+      (setq key-result (lookup-key current-map (this-command-keys)))
+      (cond ((null key-result)
+             ;; remove dead end from the list
+             (if prev
+                 (setcdr prev (cdr current-map-sublist))
+               (setq als-current-prefix-maps (cdr als-current-prefix-maps))))
+            ((keymapp key-result)
+             ;; update tree
+             (setcar current-map-sublist key-result))
+            ((functionp key-result)
+             ;; an ending! no need to call interactively,`als-expand-snippet'
+             ;; takes care of that
+             (if (funcall key-result)
+                 ;; condition evaluated to true, and snipped expanded!
+                 (setq current-map-sublist nil ; stop the loop
+                       als-current-prefix-maps nil) ; abort all other snippest
+               ;; unseccesfull. remove dead end from the list
+               (if prev
+                   (setcdr prev (cdr current-map-sublist))
+                 (setq als-current-prefix-maps (cdr als-current-prefix-maps))))))
+      ;; proceed loop
+      (setq prev current-map-sublist
+            current-map-sublist (cdr-safe current-map-sublist)))))
 
-The path is kept in `als-current-prefix-map'."
-  (let ((k (lookup-key als-current-prefix-map (this-command-keys))))
-    (setq als-current-prefix-map
-          (cond ((null k)
-                 als-prefix-map)
-                ((keymapp k)
-                 k)
-                ((functionp k)
-                 (funcall k)
-                 als-prefix-map)))))
-
-(defun als-reset-state ()
-  "Reset snippet state.
-
-Useful for tightening conditions for all snippets, to minimize accidental triggering."
-  (setq als-current-prefix-map als-prefix-map))
 
 ;;;###autoload
 (define-minor-mode auto-latex-snippets-mode
@@ -229,9 +243,7 @@ Useful for tightening conditions for all snippets, to minimize accidental trigge
 See TODO for the availible snippets."
   :init-value nil
   (if auto-latex-snippets-mode
-      (progn
-        (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
-        (add-hook 'yas-before-expand-snippet-hook #'als-reset-state 0 t))
+      (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
     (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook t)))
 
 (provide 'auto-latex-snippets)
