@@ -25,10 +25,14 @@
   "Expand snippet with KEY as EXPANSION.
 
 When CONDITION is a function, call it and do not expand if
-returned nil."
+returned nil.
+
+EXPANTION is called interactively, and CONDITION non-interactively."
   (when (and
+         ;; key was fully typed
          (save-excursion
            (search-backward key (- (point) (length key)) t))
+         ;; condition is either not present, or evaluates to true
          (or (null condition)
              (let (returned)
                (backward-char (length key))
@@ -37,7 +41,7 @@ returned nil."
                returned)))
     (delete-char (- (length key)))
     (if (functionp expansion)
-        (funcall expansion)
+        (call-interactively expansion)
       (insert expansion))))
 
 
@@ -89,6 +93,7 @@ For examples see the definition of `als-prefix-map'.
 
 (defun als-insert-subscript ()
   "Expansion function used for auto-subscript snippets."
+  (interactive)
   (insert "_" (this-command-keys)))
 
 (defun als-auto-index-condition ()
