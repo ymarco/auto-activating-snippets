@@ -204,7 +204,7 @@ Gets updated by `als-post-self-insert-hook'.")
 
 (defun als-post-self-insert-hook ()
   "TODO."
-  (push als-prefix-map als-current-prefix-maps)
+  (setq als-current-prefix-maps (nconc als-current-prefix-maps (list als-prefix-map)))
   (let ((current-map-sublist als-current-prefix-maps)
         current-map
         key-result
