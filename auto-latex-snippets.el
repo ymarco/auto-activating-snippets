@@ -48,8 +48,9 @@ EXPANTION is called interactively, and CONDITION non-interactively."
     (run-hooks als-pre-snippet-expand-hook)
     (if (functionp expansion)
         (call-interactively expansion)
-      (insert expansion)
-    (run-hooks als-pre-snippet-expand-hook))))
+      (insert expansion))
+    (run-hooks als-pre-snippet-expand-hook)
+    t))
 
 
 (defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
