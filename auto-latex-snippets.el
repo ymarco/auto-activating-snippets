@@ -29,21 +29,21 @@
 (defun als-expand-snippet-maybe (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
-When CONDITION is a function, call it and do not expand if
-returned nil.
+When CONDITION is a function, call (from the position in the
+buffer exactly before the key) and do not expand if it returned
+nil. CONDITION is expected not to modify the buffer.
 
-EXPANTION is called interactively, and CONDITION non-interactively."
+EXPANTION is called interactively, and CONDITION
+non-interactively."
   (when (and
          ;; key was fully typed
          (save-excursion
            (search-backward key (- (point) (length key)) t))
          ;; condition is either not present, or evaluates to true
          (or (null condition)
-             (let (returned)
-               (backward-char (length key))
-               (setq returned (funcall condition))
-               (forward-char (length key))
-               returned)))
+             (backward-char (length key))
+             (prog1 (funcall condition)
+               (forward-char (length key)))))
     (delete-char (- (length key)))
     (run-hooks als-pre-snippet-expand-hook)
     (if (functionp expansion)
@@ -65,31 +65,31 @@ CONDITION must be nil or a function."
   (define-key keymap key
     (lambda () (als-expand-snippet-maybe key expansion condition))))
 
-(defun als-set-expanding-ligatures (keymap &rest rest)
-  "Set multiple KEY-EXPANSIONS on KEYMAP for `als-set-expanding-ligature'.
+(defun als-set-expanding-ligatures (keymap &rest args)
+  "Set multiple keys and expansions on KEYMAP for `als-set-expanding-ligature'.
 
 Return the keymap.
 
-The following keywords are avaliable:
+The following keywords in ARGS are avaliable:
   :cond CONDITION         set the condition for the the following snippets
-  :cond-desc DESCRIPTION  set the description of the previous declared condition
-  :desc                   set the description for the following snippet
+  :cond-desc DESCRIPTION  set the description of the previously specified condition TODO
+  :desc                   set the description for the following snippet TODO
 
 For examples see the definition of `als-prefix-map'.
 
 \(fn KEYMAP [:desc :cond :cond-desc] KEY-EXPANSIONS)"
   (let (item desc cond cond-desc)
-    (while rest
-      (setq item (pop rest))
+    (while args
+      (setq item (pop args))
       (if (keywordp item)
           (pcase item
-            (:desc      (setq desc      (pop rest)))
-            (:cond      (setq cond      (pop rest)))
-            (:cond-desc (setq cond-desc (pop rest)))
+            (:desc      (setq desc      (pop args)))
+            (:cond      (setq cond      (pop args)))
+            (:cond-desc (setq cond-desc (pop args)))
             (_ (error "Unknown keyword: %s" item)))
         ;; regular key-expansion
         (let ((key item)
-              (expansion (pop rest)))
+              (expansion (pop args)))
           (als-define-prefix-map-snippet keymap key expansion cond))))))
 
 (defun als-insert-subscript ()
@@ -183,6 +183,16 @@ For examples see the definition of `als-prefix-map'.
      "perp"  "\\perp"
      "sin"  "\\sin"
      "star"  "\\star"
+
+     "CC" "\\CC"
+     "FF" "\\FF"
+     "HH" "\\HH"
+     "NN" "\\NN"
+     "PP" "\\PP"
+     "QQ" "\\QQ"
+     "RR" "\\RR"
+     "ZZ" "\\ZZ"
+
      ;; "to"  "\\to"
      :cond #'als-auto-index-condition
      "0"  #'als-insert-subscript
