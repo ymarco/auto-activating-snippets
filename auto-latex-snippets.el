@@ -54,16 +54,8 @@ CONDITION must be nil or a function."
     (error "Expansion must be either a string or function"))
   (unless (or (null condition) (functionp condition))
     (error "Condition must be either a string or function"))
-
-  (let ((incomplete-key (substring key 0 -1))
-        (orig-keymap keymap))
-    (mapc (lambda (c)
-            (setq keymap (or (lookup-key keymap (string c))
-                             (define-key keymap (string c) (make-sparse-keymap)))))
-          incomplete-key)
-    (define-key keymap (substring key -1)
-      (lambda () (als-expand-snippet key expansion condition)))
-    orig-keymap))
+  (define-key keymap key
+    (lambda () (als-expand-snippet-maybe key expansion condition))))
 
 (defun als-set-expanding-ligatures (keymap &rest rest)
   "Set multiple KEY-EXPANSIONS on KEYMAP for `als-set-expanding-ligature'.
