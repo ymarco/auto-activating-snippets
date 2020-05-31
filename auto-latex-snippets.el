@@ -21,7 +21,7 @@
 
 (require 'texmathp)
 
-(defun als-expand-snippet (key expansion &optional condition)
+(defun als-expand-snippet-maybe (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
 When CONDITION is a function, call it and do not expand if
@@ -45,10 +45,11 @@ EXPANTION is called interactively, and CONDITION non-interactively."
       (insert expansion))))
 
 
-(defun als-make-prefix-map (keymap key expansion condition)
-  "Bind KEY as extended prefix in KEYMAP to EXPANTION.
+(defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
+  "Bind KEY (string) as extended prefix in KEYMAP (keymap) to EXPANTION.
 
-EXPANTION must either be a string or function."
+EXPANTION must either be a string or an interactive function.
+CONDITION must be nil or a function."
   (unless (or (stringp expansion) (functionp expansion))
     (error "Expansion must be either a string or function"))
   (unless (or (null condition) (functionp condition))
@@ -89,7 +90,7 @@ For examples see the definition of `als-prefix-map'.
         ;; regular key-expansion
         (let ((key item)
               (expansion (pop rest)))
-          (als-make-prefix-map keymap key expansion cond))))))
+          (als-define-prefix-map-snippet keymap key expansion cond))))))
 
 (defun als-insert-subscript ()
   "Expansion function used for auto-subscript snippets."
@@ -210,8 +211,8 @@ Gets updated by `als-post-self-insert-hook'.")
         key-result
         prev)
     (while current-map-sublist
-      (setq current-map (car current-map-sublist))
-      (setq key-result (lookup-key current-map (this-command-keys)))
+      (setq current-map (car current-map-sublist)
+            key-result (lookup-key current-map (this-command-keys)))
       (cond ((null key-result)
              ;; remove dead end from the list
              (if prev
@@ -221,11 +222,11 @@ Gets updated by `als-post-self-insert-hook'.")
              ;; update tree
              (setcar current-map-sublist key-result))
             ((functionp key-result)
-             ;; an ending! no need to call interactively,`als-expand-snippet'
+             ;; an ending! no need to call interactively,`als-expand-snippet-maybe'
              ;; takes care of that
              (if (funcall key-result)
                  ;; condition evaluated to true, and snipped expanded!
-                 (setq current-map-sublist nil ; stop the loop
+                 (setq current-map-sublist nil      ; stop the loop
                        als-current-prefix-maps nil) ; abort all other snippest
                ;; unseccesfull. remove dead end from the list
                (if prev
