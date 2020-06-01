@@ -45,11 +45,11 @@ non-interactively."
              (prog1 (funcall condition)
                (forward-char (length key)))))
     (delete-char (- (length key)))
-    (run-hooks als-pre-snippet-expand-hook)
+    (run-hooks 'als-pre-snippet-expand-hook)
     (if (functionp expansion)
         (call-interactively expansion)
       (insert expansion))
-    (run-hooks als-pre-snippet-expand-hook)
+    (run-hooks 'als-post-snippet-expand-hook)
     t))
 
 
