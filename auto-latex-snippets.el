@@ -318,6 +318,16 @@ Gets updated by `als-post-self-insert-hook'.")
       (setq prev current-map-sublist
             current-map-sublist (cdr-safe current-map-sublist)))))
 
+(defun als--debug-print-tree-options ()
+  "Print debug info about what entries into the tree are currently kept track of."
+  (message "%s entries: %s"
+           (length als-current-prefix-maps)
+           (mapcar (lambda (kmap)
+                     (apply #'string (sort (mapcar (lambda (key-and-binding)
+                                                     (car key-and-binding))
+                                                   (cdr kmap))
+                                           '<)))
+                   als-current-prefix-maps)))
 
 ;;;###autoload
 (define-minor-mode auto-latex-snippets-mode
