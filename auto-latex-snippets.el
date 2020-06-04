@@ -133,7 +133,6 @@ For examples see the definition of `als-prefix-map'.
      ">>" 	"\\gg"
      "AA" 	"\\forall"
      "EE" 	"\\exists"
-     "aii" 	"a_i"
      "aip1" 	"a_{i+1}"
      "cb" 	"^3"
      "iff" 	"\\iff"
@@ -267,6 +266,7 @@ For examples see the definition of `als-prefix-map'.
      :cond #'als-auto-index-condition
      :cond-desc "In math and after a single letter"
      :desc "Automatic subscripts"
+     "ii" #'als-insert-subscript
      "0"  #'als-insert-subscript
      "1"  #'als-insert-subscript
      "2"  #'als-insert-subscript
