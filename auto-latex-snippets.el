@@ -267,6 +267,7 @@ For examples see the definition of `als-prefix-map'.
      :cond-desc "In math and after a single letter"
      :desc "Automatic subscripts"
      "ii" #'als-insert-subscript
+     "jj" #'als-insert-subscript
      "0"  #'als-insert-subscript
      "1"  #'als-insert-subscript
      "2"  #'als-insert-subscript
