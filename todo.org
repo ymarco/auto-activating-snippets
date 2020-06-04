@@ -12,6 +12,8 @@ The table -> code is preferable I think
 ** TODO Yasnippet expansions
 Store the snippets source in a list/hashmap instead of separate files.
 *** TODO Smart frac
+** TODO Finer grained subscripts
+So a_11 becomes a_{11} - essentially you'd write a11 to get the subscripts.
 
 * In consideration
 ** Stricter condition for some cases?
