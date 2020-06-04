@@ -258,8 +258,8 @@ For examples see the definition of `als-prefix-map'.
      ";]" "\\Rightarrow"    ";;]" "\\Longrightarrow"
      ";{"  "\\subset"
      ";}"  "\\supset"
-     ";<"  "\\leftarrow"     ";;<" "\\longleftarrow"     "\\min"
-     ";>"  "\\rightarrow"    ";;>" "\\longrightarrow"    "\\max"
+     ";<"  "\\leftarrow"    ";;<" "\\longleftarrow"  ";;;<" "\\min"
+     ";>"  "\\rightarrow"   ";;>" "\\longrightarrow" ";;;>" "\\max"
      ";'"  "\\prime"
      ";."  "\\cdot"
 
