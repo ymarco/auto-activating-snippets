@@ -266,18 +266,22 @@ For examples see the definition of `als-prefix-map'.
      :cond #'als-auto-index-condition
      :cond-desc "In math and after a single letter"
      :desc "Automatic subscripts"
-     "ii" #'als-insert-subscript
-     "jj" #'als-insert-subscript
-     "0"  #'als-insert-subscript
-     "1"  #'als-insert-subscript
-     "2"  #'als-insert-subscript
-     "3"  #'als-insert-subscript
-     "4"  #'als-insert-subscript
-     "5"  #'als-insert-subscript
-     "6"  #'als-insert-subscript
-     "7"  #'als-insert-subscript
-     "8"  #'als-insert-subscript
-     "9"  #'als-insert-subscript)
+     "ii"  #'als-insert-subscript
+     "ip1" "_{i+1}"
+     "jj"  #'als-insert-subscript
+     "jp1" "_{j+1}"
+     "nn"  #'als-insert-subscript
+     "np1" "_{n+1}"
+     "0"   #'als-insert-subscript
+     "1"   #'als-insert-subscript
+     "2"   #'als-insert-subscript
+     "3"   #'als-insert-subscript
+     "4"   #'als-insert-subscript
+     "5"   #'als-insert-subscript
+     "6"   #'als-insert-subscript
+     "7"   #'als-insert-subscript
+     "8"   #'als-insert-subscript
+     "9"   #'als-insert-subscript)
     keymap)
   "Defalut snippet keymap.")
 
