@@ -274,6 +274,8 @@ For examples see the definition of `als-prefix-map'.
      "jp1" "_{j+1}"
      "nn"  "_n"
      "np1" "_{n+1}"
+     "kk"  "_k"
+     "kp1" "_{k+1}"
      "0"   #'als-insert-subscript
      "1"   #'als-insert-subscript
      "2"   #'als-insert-subscript
