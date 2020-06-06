@@ -99,8 +99,8 @@ For examples see the definition of `als-prefix-map'.
   (interactive)
   (insert "_" (this-command-keys)))
 
-(defun als-auto-index-condition ()
-  "Condition usef for auto-subscript snippets."
+(defun als-auto-script-condition ()
+  "Condition used for auto-sub/superscript snippets."
   (and
    ;; Before is some indexable char
    (or (<= ?a (char-before) ?z)
@@ -263,7 +263,7 @@ For examples see the definition of `als-prefix-map'.
      ";."  "\\cdot"
 
      ;; "to"  "\\to"
-     :cond #'als-auto-index-condition
+     :cond #'als-auto-script-condition
      :cond-desc "In math and after a single letter"
      :desc "Automatic subscripts"
      "ii"  "_i"
