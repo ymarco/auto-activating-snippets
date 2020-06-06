@@ -268,11 +268,11 @@ For examples see the definition of `als-prefix-map'.
      :cond #'als-auto-index-condition
      :cond-desc "In math and after a single letter"
      :desc "Automatic subscripts"
-     "ii"  #'als-insert-subscript
+     "ii"  "_i"
      "ip1" "_{i+1}"
-     "jj"  #'als-insert-subscript
+     "jj"  "_j"
      "jp1" "_{j+1}"
-     "nn"  #'als-insert-subscript
+     "nn"  "_n"
      "np1" "_{n+1}"
      "0"   #'als-insert-subscript
      "1"   #'als-insert-subscript
