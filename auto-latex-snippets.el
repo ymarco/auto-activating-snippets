@@ -78,6 +78,7 @@ The following keywords in ARGS are avaliable:
 For examples see the definition of `als-prefix-map'.
 
 \(fn KEYMAP [:desc :cond :cond-desc] KEY-EXPANSIONS)"
+  ;; TODO handle cases like a_11
   (let (item desc cond cond-desc)
     (while args
       (setq item (pop args))
@@ -94,6 +95,7 @@ For examples see the definition of `als-prefix-map'.
 
 (defun als-insert-subscript ()
   "Expansion function used for auto-subscript snippets."
+  ;; TODO handle cases like a_11
   (interactive)
   (insert "_" (this-command-keys)))
 
