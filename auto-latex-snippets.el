@@ -105,11 +105,9 @@ For examples see the definition of `als-prefix-map'.
    ;; Before is some indexable char
    (or (<= ?a (char-before) ?z)
        (<= ?A (char-before) ?Z))
-   ;; Not a macro
-   (not (and (save-excursion
-               (and (search-backward "\\" (line-beginning-position) t)
-                    (looking-at "\\\\[a-zA-Z0-9*@]+")))
-             (<= (match-beginning 0) (point) (match-end 0))))
+   ;; Before that is not
+   (not (or (<= ?a (char-before (1- (point))) ?z)
+            (<= ?A (char-before (1- (point))) ?Z)))
    ;; Inside math
    (texmathp)))
 
