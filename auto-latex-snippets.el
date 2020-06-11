@@ -159,7 +159,7 @@ For examples see the definition of `als-prefix-map'.
       (point)))))
 
 (defun als-wrap-previous-object (tex-command)
-  "Expansion function used for auto-subscript snippets."
+  "Wrap previous TeX object in TEX-COMMAND."
   (interactive)
   (let ((start (als-identify-adjacent-tex-object)))
     (insert "}")
@@ -169,13 +169,29 @@ For examples see the definition of `als-prefix-map'.
       (goto-char start)
       (insert (concat "\\" tex-command "{")))))
 
-(defun als-accent-condition ()
-  "Condition used for auto-sub/superscript snippets."
+(defun als-object-on-left-condition ()
+  "Return t if there is a TeX object imidiately to the left."
   (and (or (<= ?a (char-before) ?z)
            (<= ?A (char-before) ?Z)
            (<= ?0 (char-before) ?9)
            (memq (char-before) '(?\) ?\])))
        (texmathp)))
+
+(defun als-smart-fraction ()
+  "Expansion function used for auto-subscript snippets."
+  (interactive)
+  (let ((start (als-identify-adjacent-tex-object)))
+    (save-excursion
+      ;; if bracketed, delete outermost brackets
+      (if (memq (char-before) '(?\) ?\]))
+          (progn
+            (backward-delete-char 1)
+            (goto-char start)
+            (delete-char 1))
+        (goto-char start))
+      (insert "\\frac{")))
+  (insert "}{}")
+  (left-char))
 
 (defvar als-default-snippets
   (list
@@ -321,6 +337,11 @@ For examples see the definition of `als-prefix-map'.
    ";'"  "\\prime"
    ";."  "\\cdot"
 
+   :cond #'als-object-on-left-condition
+   :cond-desc "If LaTeX object immidiately to the left"
+   :desc "Smart fraction"
+   "/" #'als-smart-fraction
+
    ;; "to"  "\\to"
    :cond #'als-auto-script-condition
    :cond-desc "In math and after a single letter"
@@ -345,7 +366,7 @@ For examples see the definition of `als-prefix-map'.
    "9"   #'als-insert-subscript
 
     ;; accents
-    :cond #'als-accent-condition
+    :cond #'als-object-on-left-condition
     :cond-desc "If LaTeX symbol immidiately before point."
     :desc "A simpler way to apply accents"
     ". "  (lambda () (interactive) (als-wrap-previous-object "dot"))

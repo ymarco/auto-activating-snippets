@@ -3,7 +3,8 @@
 * Do it now
 ** DONE cdlatex accents
 And use the accent engine to make the ~abar -> \bar{a}~ style snippets.
-** TODO smart frac
+** STRT smart frac
+Works, but could do with being able to =TAB= out of the denominator/
 ** TODO Try to find how to generate undo entries
 So users can easily undo expansions. Maybe even bind DEL in a transient map
 after expansions to undo expansions.
