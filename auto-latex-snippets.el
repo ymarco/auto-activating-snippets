@@ -113,13 +113,12 @@ For examples see the definition of `als-prefix-map'.
 (defun als-insert-subscript ()
   "Expansion function used for auto-subscript snippets."
   (interactive)
-  (cond
+  (pcase als-transient-snippet-condition-result
    ;; new subscript after a letter
-   ((or (<= ?a (char-before) ?z)
-        (<= ?A (char-before) ?Z))
+   ('one-sub
     (insert "_" (this-command-keys)))
    ;; continuing a digit subscript
-   ((<= ?0 (char-before) ?9)
+   ('extended-sub
     (backward-char)
     (insert "{")
     (forward-char)
@@ -127,20 +126,22 @@ For examples see the definition of `als-prefix-map'.
 
 (defun als-auto-script-condition ()
   "Condition used for auto-sub/superscript snippets."
-  (or (and
-       ;; Before is some indexable char
-       (or (<= ?a (char-before) ?z)
-           (<= ?A (char-before) ?Z))
-       ;; Before that is not
-       (not (or (<= ?a (char-before (1- (point))) ?z)
-                (<= ?A (char-before (1- (point))) ?Z)))
-       ;; Inside math
-       (texmathp))
-      (and
-       ;; Before is another digit subscript
-       (<= ?0 (char-before) ?9)
-       (= (char-before (1- (point))) ?_)
-       (texmathp))))
+  (cond ((and
+          ;; Before is some indexable char
+          (or (<= ?a (char-before) ?z)
+              (<= ?A (char-before) ?Z))
+          ;; Before that is not
+          (not (or (<= ?a (char-before (1- (point))) ?z)
+                   (<= ?A (char-before (1- (point))) ?Z)))
+          ;; Inside math
+          (texmathp))
+         'one-sub)
+        ((and
+          ;; Before is another digit subscript
+          (<= ?0 (char-before) ?9)
+          (= (char-before (1- (point))) ?_)
+          (texmathp))
+         'extended-sub)))
 
 
 (defun als-identify-adjacent-tex-object (&optional point)
