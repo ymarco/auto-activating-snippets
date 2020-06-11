@@ -122,7 +122,8 @@ For examples see the definition of `als-prefix-map'.
       (and
        ;; Before is another digit subscript
        (<= ?0 (char-before) ?9)
-       (= (char-before (1- (point))) ?_))))
+       (= (char-before (1- (point))) ?_)
+       (texmathp))))
 
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
