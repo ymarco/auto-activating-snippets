@@ -1,0 +1,28 @@
+#+TITLE: Snippets
+
+#+BEGIN_SRC emacs-lisp
+(let ((snippets als-default-snippets)
+      item expansion desc cond-desc
+      res)
+  (while snippets
+    (setq item (pop snippets))
+    (if (keywordp item)
+        (pcase item
+          (:desc      (setq desc      (pop snippets)))
+          (:cond      (pop snippets)) ; no need to show condition whith :cond-desc
+          (:cond-desc (setq cond-desc (pop snippets)))
+          (_ (error "Unknown keyword: %s" item)))
+      (let ((key item)
+            (expansion (pop snippets)))
+        (push
+         ;; replace | with unicode so org doesn't think its a table column
+         (mapcar (lambda (s)
+                   (if (stringp s)
+                       (replace-regexp-in-string "|" "❘" s)
+                     s))
+                 (list key expansion cond-desc))
+         res))
+      ;; only need to show conditions once
+      (setq cond-desc "")))
+  (nreverse res))
+#+END_SRC
