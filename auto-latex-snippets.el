@@ -97,19 +97,33 @@ For examples see the definition of `als-prefix-map'.
   "Expansion function used for auto-subscript snippets."
   ;; TODO handle cases like a_11
   (interactive)
-  (insert "_" (this-command-keys)))
+  (cond
+   ;; new subscript after a letter
+   ((or (<= ?a (char-before) ?z)
+        (<= ?A (char-before) ?Z))
+    (insert "_" (this-command-keys)))
+   ;; continuing a digit subscript
+   ((<= ?0 (char-before) ?9)
+    (backward-char)
+    (insert "{")
+    (forward-char)
+    (insert (this-command-keys) "}"))))
 
 (defun als-auto-script-condition ()
   "Condition used for auto-sub/superscript snippets."
-  (and
-   ;; Before is some indexable char
-   (or (<= ?a (char-before) ?z)
-       (<= ?A (char-before) ?Z))
-   ;; Before that is not
-   (not (or (<= ?a (char-before (1- (point))) ?z)
-            (<= ?A (char-before (1- (point))) ?Z)))
-   ;; Inside math
-   (texmathp)))
+  (or (and
+       ;; Before is some indexable char
+       (or (<= ?a (char-before) ?z)
+           (<= ?A (char-before) ?Z))
+       ;; Before that is not
+       (not (or (<= ?a (char-before (1- (point))) ?z)
+                (<= ?A (char-before (1- (point))) ?Z)))
+       ;; Inside math
+       (texmathp))
+      (and
+       ;; Before is another digit subscript
+       (<= ?0 (char-before) ?9)
+       (= (char-before (1- (point))) ?_))))
 
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
