@@ -190,8 +190,10 @@ For examples see the definition of `als-prefix-map'.
             (delete-char 1))
         (goto-char start))
       (insert "\\frac{")))
-  (insert "}{}")
-  (left-char))
+  (if (bound-and-true-p smartparens-mode)
+      (insert "}{")
+    (insert "}{}")
+    (backward-char)))
 
 (defvar als-default-snippets
   (list
