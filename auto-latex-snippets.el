@@ -9,7 +9,7 @@
 ;; Version: 0.0.1
 ;; Keywords:
 ;; Homepage: https://github.com/tecosaur/auto-latex-snippets
-;; Package-Requires: ((emacs 27.0.90) (cl-lib "0.5"))
+;; Package-Requires: ((emacs 26.1) (cl-lib "0.5") (yasnippet 0.14))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -20,6 +20,7 @@
 ;;; Code:
 
 (require 'texmathp)
+(require 'yasnippet)
 
 (defvar als-pre-snippet-expand-hook nil
   "Hooks to run just before expanding snippets.")
