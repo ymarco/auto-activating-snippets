@@ -216,7 +216,6 @@ For examples see the definition of `als-prefix-map'.
    ">>" 	"\\gg"
    "AA" 	"\\forall"
    "EE" 	"\\exists"
-   "aip1" 	"a_{i+1}"
    "cb" 	"^3"
    "iff" 	"\\iff"
    "inn" 	"\\in"
