@@ -62,6 +62,13 @@ non-interactively."
     (run-hooks 'als-post-snippet-expand-hook)
     t))
 
+(defun als-current-snippet-insert-post-space-if-wanted ()
+  (when (and (stringp als-transient-snippet-expansion)
+             (= ?\\ (aref als-transient-snippet-expansion 0))
+             (not (memq (char-after) '(?\) ?\] ?\\))))
+    (insert " ")))
+
+(add-hook 'als-post-snippet-expand-hook #'als-current-snippet-insert-post-space-if-wanted)
 
 (defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
   "Bind KEY (string) as extended prefix in KEYMAP (keymap) to EXPANTION.
