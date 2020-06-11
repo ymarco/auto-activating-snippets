@@ -180,20 +180,30 @@ For examples see the definition of `als-prefix-map'.
 (defun als-smart-fraction ()
   "Expansion function used for auto-subscript snippets."
   (interactive)
-  (let ((start (als-identify-adjacent-tex-object)))
-    (save-excursion
-      ;; if bracketed, delete outermost brackets
-      (if (memq (char-before) '(?\) ?\]))
-          (progn
-            (backward-delete-char 1)
-            (goto-char start)
-            (delete-char 1))
-        (goto-char start))
-      (insert "\\frac{")))
-  (if (bound-and-true-p smartparens-mode)
-      (insert "}{")
-    (insert "}{}")
-    (backward-char)))
+  (let* ((tex-obj (als-identify-adjacent-tex-object))
+         (start (save-excursion
+                  ;; if bracketed, delete outermost brackets
+                  (if (memq (char-before) '(?\) ?\]))
+                      (progn
+                        (backward-delete-char 1)
+                        (goto-char tex-obj)
+                        (delete-char 1))
+                    (goto-char tex-obj))
+                  (point)))
+         (end (point))
+         (content (buffer-substring-no-properties start end)))
+    (yas-expand-snippet (format "\\frac{%s}{$1}$0" content)
+                        start end))
+  ;; shut up smartparens, damn you
+  (when (bound-and-true-p smartparens-mode)
+    (let ((pch post-self-insert-hook)
+          (gpch (default-value 'post-self-insert-hook)))
+      (setq post-self-insert-hook nil)
+      (setq-default post-self-insert-hook nil)
+      (push (lambda ()
+              (setq post-self-insert-hook pch)
+              (setq-default post-self-insert-hook gpch))
+            post-self-insert-hook))))
 
 (defvar als-default-snippets
   (list
