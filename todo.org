@@ -3,14 +3,26 @@
 * Do it now
 ** DONE cdlatex accents
 And use the accent engine to make the ~abar -> \bar{a}~ style snippets.
+** TODO Decide what cdlatex snippets to keep
+** TODO Decide syntax for power
+Needed expansions: =^i=, =^j=, =^ij=, =^k=, =^n=, and maybe =+1= versions too
+*** Options
+We only need to consider collisions with words that start with 1 alphabet letter
+and then one of these expantions, see regexes.
+**** =p= prefix
+=pi=, =pj=, =pn=. Matching regex: =^[A-Za-z]p[ijkn]=
+**** =p= postfix
+=ip=, =jp=, =np=. Matching regex: =^[A-Za-z][ijkn]p=
+*** TODO check regexes against English words
 ** TODO Try to find how to generate undo entries
 So users can easily undo expansions. Maybe even bind DEL in a transient map
 after expansions to undo expansions.
 
 Look at ~buffer-undo-list~ and how smartparens does it.
 ** STRT Org table <-> elisp code pipeline
-The table -> code is preferable I think
-*** TODO Figure what to
+The table -> code is preferable I think. Currently we have code -> table but
+we'd need to separate into separate vars holding snippet list source in order to
+format it to separate tables.
 ** DONE Yasnippet expansions
 Store the snippets source in a list/hashmap instead of separate files.
 *** DONE Smart frac
