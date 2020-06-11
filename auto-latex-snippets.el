@@ -65,7 +65,7 @@ CONDITION must be nil or a function."
   (define-key keymap key
     (lambda () (als-expand-snippet-maybe key expansion condition))))
 
-(defun als-set-expanding-ligatures (keymap &rest args)
+(defun als-set-snippets (keymap &rest args)
   "Set multiple keys and expansions using KEYMAP as the tree to store in.
 
 Return the keymap.
@@ -126,7 +126,7 @@ For examples see the definition of `als-prefix-map'.
 
 (defvar als-prefix-map
   (let ((keymap (make-sparse-keymap)))
-    (als-set-expanding-ligatures
+    (als-set-snippets
      keymap
      :cond #'texmathp
      "!=" 	"\\neq"
