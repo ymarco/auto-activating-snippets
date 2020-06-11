@@ -26,6 +26,13 @@
 (defvar als-post-snippet-expand-hook nil
   "Hooks to run just after expanding snippets.")
 
+(defvar als-transient-snippet-key nil
+  "KEY of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
+(defvar als-transient-snippet-expansion nil
+  "EXPANSION of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
+(defvar als-transient-snippet-condition-result nil
+  "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
+
 (defun als-expand-snippet-maybe (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
@@ -35,15 +42,18 @@ nil. CONDITION is expected not to modify the buffer.
 
 EXPANTION is called interactively, and CONDITION
 non-interactively."
-  (when (and
-         ;; key was fully typed
-         (save-excursion
-           (search-backward key (- (point) (length key)) t))
-         ;; condition is either not present, or evaluates to true
-         (or (null condition)
-             (backward-char (length key))
-             (prog1 (funcall condition)
-               (forward-char (length key)))))
+  (when-let ((als-transient-snippet-key key)
+             (als-transient-snippet-expansion expansion)
+             (als-transient-snippet-condition-result
+              (and
+               ;; key was fully typed
+               (save-excursion
+                 (search-backward key (- (point) (length key)) t))
+               ;; condition is either not present, or evaluates to true
+               (or (null condition)
+                   (backward-char (length key))
+                   (prog1 (funcall condition)
+                     (forward-char (length key)))))))
     (delete-char (- (length key)))
     (run-hooks 'als-pre-snippet-expand-hook)
     (if (functionp expansion)
