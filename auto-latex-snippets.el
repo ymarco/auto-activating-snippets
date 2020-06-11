@@ -66,7 +66,7 @@ CONDITION must be nil or a function."
     (lambda () (als-expand-snippet-maybe key expansion condition))))
 
 (defun als-set-expanding-ligatures (keymap &rest args)
-  "Set multiple keys and expansions on KEYMAP for `als-set-expanding-ligature'.
+  "Set multiple keys and expansions using KEYMAP as the tree to store in.
 
 Return the keymap.
 
@@ -78,7 +78,6 @@ The following keywords in ARGS are avaliable:
 For examples see the definition of `als-prefix-map'.
 
 \(fn KEYMAP [:desc :cond :cond-desc] KEY-EXPANSIONS)"
-  ;; TODO handle cases like a_11
   (let (item desc cond cond-desc)
     (while args
       (setq item (pop args))
@@ -307,7 +306,10 @@ For examples see the definition of `als-prefix-map'.
 Gets updated by `als-post-self-insert-hook'.")
 
 (defun als-post-self-insert-hook ()
-  "TODO."
+  "Try to expand snippets automatically.
+
+Use for the typing history, `als-current-prefix-maps' and
+`this-command-keys' for the current typed key.."
   (setq als-current-prefix-maps (nconc als-current-prefix-maps (list als-prefix-map)))
   (let ((current-map-sublist als-current-prefix-maps)
         current-map
