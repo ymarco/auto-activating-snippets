@@ -1,7 +1,7 @@
 #+TITLE: Todo
 
 * Do it now
-** TODO cdlatex accents
+** DONE cdlatex accents
 And use the accent engine to make the ~abar -> \bar{a}~ style snippets.
 ** TODO smart frac
 ** TODO Try to find how to generate undo entries

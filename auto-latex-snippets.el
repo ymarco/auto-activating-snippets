@@ -142,6 +142,41 @@ For examples see the definition of `als-prefix-map'.
        (= (char-before (1- (point))) ?_)
        (texmathp))))
 
+
+(defun als-identify-adjacent-tex-object (&optional point)
+  "Return the startig position of the left-adjacent TeX object from POINT."
+  (save-excursion
+    (goto-char (or point (point)))
+    (cond
+     ((memq (char-before) '(?\) ?\]))
+      (backward-sexp)
+      (point))
+     ((or (<= ?a (char-before) ?z)
+          (<= ?A (char-before) ?Z)
+          (<= ?0 (char-before) ?9))
+      (backward-word)
+      (when (= (char-before) ?\\) (backward-char))
+      (point)))))
+
+(defun als-wrap-previous-object (tex-command)
+  "Expansion function used for auto-subscript snippets."
+  (interactive)
+  (let ((start (als-identify-adjacent-tex-object)))
+    (insert "}")
+    (when (aref als-transient-snippet-key (1- (length als-transient-snippet-key)))
+      (insert " "))
+    (save-excursion
+      (goto-char start)
+      (insert (concat "\\" tex-command "{")))))
+
+(defun als-accent-condition ()
+  "Condition used for auto-sub/superscript snippets."
+  (and (or (<= ?a (char-before) ?z)
+           (<= ?A (char-before) ?Z)
+           (<= ?0 (char-before) ?9)
+           (memq (char-before) '(?\) ?\])))
+       (texmathp)))
+
 (defvar als-default-snippets
   (list
    :cond #'texmathp
@@ -180,20 +215,14 @@ For examples see the definition of `als-prefix-map'.
    ;; "a" "+b 	a + b"
    ;; "a" "^ 	a^"
    ;; "a+" 	"a +"
-   ;; "a." 	"\\dot{a}"
-   ;; "a.." 	"\\ddot{a}"
    ;; "a^11" 	"a^{11}"
    ;; "a_11" 	"a_{11}"
-   ;; "abar" 	"\\overline{a}"
-   ;; "ahat" 	"\\hat{a}"
-   ;; "a~" 	"\\tilde{a}"
    ;; "case" 	"cases env."
    ;; "part" 	"\\frac{\\partial }{\\partial }"
    ;; "pmat" 	"pmatrix"
    ;; "set" 	"\\{ \\}"
    ;; "sq" 	"\\sqrt{}"
    ;; "st" 	"\\text{s.t.}"
-   ;; "v,." 	"\\vec{v}"
    ;;"\\\\\\"\\" 	"\\setminus"
 
    "arccos"  "\\arccos"
@@ -313,7 +342,19 @@ For examples see the definition of `als-prefix-map'.
    "6"   #'als-insert-subscript
    "7"   #'als-insert-subscript
    "8"   #'als-insert-subscript
-   "9"   #'als-insert-subscript)
+   "9"   #'als-insert-subscript
+
+    ;; accents
+    :cond #'als-accent-condition
+    :cond-desc "If LaTeX symbol immidiately before point."
+    :desc "A simpler way to apply accents"
+    ". "  (lambda () (interactive) (als-wrap-previous-object "dot"))
+    ".. " (lambda () (interactive) (als-wrap-previous-object "dot"))
+    ",."  (lambda () (interactive) (als-wrap-previous-object "vec"))
+    ".,"  (lambda () (interactive) (als-wrap-previous-object "vec"))
+    "~ "  (lambda () (interactive) (als-wrap-previous-object "tilde"))
+    "hat" (lambda () (interactive) (als-wrap-previous-object "hat"))
+    "bar" (lambda () (interactive) (als-wrap-previous-object "overline")))
   "Default snippets, for use when defining `als-prefix-map'.")
 
 (defvar als-prefix-map
