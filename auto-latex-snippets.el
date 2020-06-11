@@ -95,7 +95,6 @@ For examples see the definition of `als-prefix-map'.
 
 (defun als-insert-subscript ()
   "Expansion function used for auto-subscript snippets."
-  ;; TODO handle cases like a_11
   (interactive)
   (cond
    ;; new subscript after a letter
