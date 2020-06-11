@@ -111,14 +111,14 @@ For examples see the definition of `als-prefix-map'.
           (als-define-prefix-map-snippet keymap key expansion cond)))))
   keymap)
 
-(defun als-insert-subscript ()
-  "Expansion function used for auto-subscript snippets."
+(defun als-insert-script ()
+  "Expansion function used for auto-sub/superscript snippets."
   (interactive)
   (pcase als-transient-snippet-condition-result
    ;; new subscript after a letter
    ('one-sub
     (insert "_" (this-command-keys)))
-   ;; continuing a digit subscript
+   ;; continuing a digit sub/superscript
    ('extended-sub
     (backward-char)
     (insert "{")
@@ -138,9 +138,10 @@ For examples see the definition of `als-prefix-map'.
           (texmathp))
          'one-sub)
         ((and
-          ;; Before is another digit subscript
+          ;; Before is another digit subscript/superscript
           (<= ?0 (char-before) ?9)
-          (= (char-before (1- (point))) ?_)
+          (or (= (char-before (1- (point))) ?_)
+              (= (char-before (1- (point))) ?^))
           (texmathp))
          'extended-sub)))
 
@@ -365,16 +366,16 @@ For examples see the definition of `als-prefix-map'.
    "np1" "_{n+1}"
    "kk"  "_k"
    "kp1" "_{k+1}"
-   "0"   #'als-insert-subscript
-   "1"   #'als-insert-subscript
-   "2"   #'als-insert-subscript
-   "3"   #'als-insert-subscript
-   "4"   #'als-insert-subscript
-   "5"   #'als-insert-subscript
-   "6"   #'als-insert-subscript
-   "7"   #'als-insert-subscript
-   "8"   #'als-insert-subscript
-   "9"   #'als-insert-subscript
+   "0"   #'als-insert-script
+   "1"   #'als-insert-script
+   "2"   #'als-insert-script
+   "3"   #'als-insert-script
+   "4"   #'als-insert-script
+   "5"   #'als-insert-script
+   "6"   #'als-insert-script
+   "7"   #'als-insert-script
+   "8"   #'als-insert-script
+   "9"   #'als-insert-script
 
     ;; accents
     :cond #'als-object-on-left-condition
