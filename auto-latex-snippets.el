@@ -197,15 +197,17 @@ For examples see the definition of `als-prefix-map'.
          (content (buffer-substring-no-properties start end)))
     (yas-expand-snippet (format "\\frac{%s}{$1}$0" content)
                         start end))
-  ;; shut up smartparens, damn you
+  ;; HACK smartparens runs after us on the global `post-self-insert-hook' and
+  ;;      thinks that because a { was inserted after a self-insert event that it
+  ;;      should insert the matching } even though we took care of that.
+  ;; TODO check it without `smartparens-global-mode' as well
   (when (bound-and-true-p smartparens-mode)
-    (let ((pch post-self-insert-hook)
-          (gpch (default-value 'post-self-insert-hook)))
-      (setq post-self-insert-hook nil)
+    (let ((gpsih (default-value 'post-self-insert-hook)))
       (setq-default post-self-insert-hook nil)
+      ;; push rather than add-hook so it doesn't run right after this very own
+      ;; hook, but next time
       (push (lambda ()
-              (setq post-self-insert-hook pch)
-              (setq-default post-self-insert-hook gpch))
+              (setq-default post-self-insert-hook gpsih))
             post-self-insert-hook))))
 
 (defvar als-default-snippets
