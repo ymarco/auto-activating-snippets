@@ -66,7 +66,7 @@ non-interactively."
 (defun als-current-snippet-insert-post-space-if-wanted ()
   (when (and (stringp als-transient-snippet-expansion)
              (= ?\\ (aref als-transient-snippet-expansion 0))
-             (not (memq (char-after) '(?\) ?\] ?\\))))
+             (not (memq (char-after) '(?\) ?\]))))
     (insert " ")))
 
 (add-hook 'als-post-snippet-expand-hook #'als-current-snippet-insert-post-space-if-wanted)
