@@ -37,7 +37,7 @@
 (defun als-expand-snippet-maybe (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
-When CONDITION is a function, call (from the position in the
+When CONDITION is a function, call it (from the position in the
 buffer exactly before the key) and do not expand if it returned
 nil. CONDITION is expected not to modify the buffer.
 
