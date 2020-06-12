@@ -180,6 +180,21 @@ For examples see the definition of `als-prefix-map'.
            (memq (char-before) '(?\) ?\])))
        (texmathp)))
 
+;; HACK smartparens runs after us on the global `post-self-insert-hook' and
+;;      thinks that because a { was inserted after a self-insert event that it
+;;      should insert the matching } even though we took care of that.
+;; TODO check it without `smartparens-global-mode' as well
+(defun als--shut-up-smartparens ()
+  "Make sure `smartparens' doesn't mess up after snippet expanding to parentheses."
+  (when (bound-and-true-p smartparens-mode)
+    (let ((gpsih (default-value 'post-self-insert-hook)))
+      (setq-default post-self-insert-hook nil)
+      ;; push rather than add-hook so it doesn't run right after this very own
+      ;; hook, but next time
+      (push (lambda ()
+              (setq-default post-self-insert-hook gpsih))
+            post-self-insert-hook))))
+
 (defun als-smart-fraction ()
   "Expansion function used for auto-subscript snippets."
   (interactive)
@@ -197,18 +212,7 @@ For examples see the definition of `als-prefix-map'.
          (content (buffer-substring-no-properties start end)))
     (yas-expand-snippet (format "\\frac{%s}{$1}$0" content)
                         start end))
-  ;; HACK smartparens runs after us on the global `post-self-insert-hook' and
-  ;;      thinks that because a { was inserted after a self-insert event that it
-  ;;      should insert the matching } even though we took care of that.
-  ;; TODO check it without `smartparens-global-mode' as well
-  (when (bound-and-true-p smartparens-mode)
-    (let ((gpsih (default-value 'post-self-insert-hook)))
-      (setq-default post-self-insert-hook nil)
-      ;; push rather than add-hook so it doesn't run right after this very own
-      ;; hook, but next time
-      (push (lambda ()
-              (setq-default post-self-insert-hook gpsih))
-            post-self-insert-hook))))
+  (als--shut-up-smartparens))
 
 (defvar als-default-snippets
   (list
