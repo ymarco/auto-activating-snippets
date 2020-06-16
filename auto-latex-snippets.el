@@ -111,23 +111,31 @@ For examples see the definition of `als-prefix-map'.
           (als-define-prefix-map-snippet keymap key expansion cond)))))
   keymap)
 
-(defun als-insert-script ()
-  "Expansion function used for auto-sub/superscript snippets."
-  (interactive)
+(defun als-insert-script (s)
+  "Add a subscript with a text of S (string).
+
+Rely on `als-transient-snippet-condition-result' to contain the
+result of `als-auto-script-condition' which gives the info
+whether to extend an existing subscript (e.g a_1 -> a_{1n}) or
+insert a new subscript (e.g a -> a_1)."
+  (interactive (list (this-command-keys)))
   (pcase als-transient-snippet-condition-result
-   ;; new subscript after a letter
-   ('one-sub
-    (insert "_" (this-command-keys)))
-   ;; continuing a digit sub/superscript
-   ('extended-sub
-    (backward-char)
-    (insert "{")
-    (forward-char)
-    (insert (this-command-keys) "}"))))
+    ;; new subscript after a letter
+    ('one-sub
+     (insert "_" s))
+    ;; continuing a digit sub/superscript
+    ('extended-sub
+     (backward-char)
+     (insert "{")
+     (forward-char)
+     (insert s "}"))))
 
 (defun als-auto-script-condition ()
   "Condition used for auto-sub/superscript snippets."
-  (cond ((and
+  (cond ((or (= (char-before (1- (point))) ?_)
+             (= (char-before (1- (point))) ?^))
+         'extended-sub)
+        ((and
           ;; Before is some indexable char
           (or (<= ?a (char-before) ?z)
               (<= ?A (char-before) ?Z))
@@ -136,14 +144,7 @@ For examples see the definition of `als-prefix-map'.
                    (<= ?A (char-before (1- (point))) ?Z)))
           ;; Inside math
           (texmathp))
-         'one-sub)
-        ((and
-          ;; Before is another digit subscript/superscript
-          (<= ?0 (char-before) ?9)
-          (or (= (char-before (1- (point))) ?_)
-              (= (char-before (1- (point))) ?^))
-          (texmathp))
-         'extended-sub)))
+         'one-sub)))
 
 
 (defun als-identify-adjacent-tex-object (&optional point)
@@ -275,6 +276,7 @@ For examples see the definition of `als-prefix-map'.
    "perp"  "\\perp"
    "sin"  "\\sin"
    "star"  "\\star"
+   "gcd"   "\\gcd"
 
    "CC" "\\CC"
    "FF" "\\FF"
@@ -364,13 +366,13 @@ For examples see the definition of `als-prefix-map'.
    :cond #'als-auto-script-condition
    :cond-desc "In math and after a single letter"
    :desc "Automatic subscripts"
-   "ii"  "_i"
+   "ii"  #'als-insert-script
    "ip1" "_{i+1}"
-   "jj"  "_j"
+   "jj"  #'als-insert-script
    "jp1" "_{j+1}"
-   "nn"  "_n"
+   "nn"  #'als-insert-script
    "np1" "_{n+1}"
-   "kk"  "_k"
+   "kk"  #'als-insert-script
    "kp1" "_{k+1}"
    "0"   #'als-insert-script
    "1"   #'als-insert-script
