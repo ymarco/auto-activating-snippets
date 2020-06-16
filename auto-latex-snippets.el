@@ -156,6 +156,12 @@ insert a new subscript (e.g a -> a_1)."
      ((memq (char-before) '(?\) ?\]))
       (backward-sexp)
       (point))
+     ((and (= (char-before) ?})
+           (save-excursion
+             (cl-loop do (backward-sexp)
+                      while (= (char-before) ?}))
+             (looking-back "\\\\[A-Za-z]+\\*?" (- (point) 20))))
+      (match-beginning 0))
      ((or (<= ?a (char-before) ?z)
           (<= ?A (char-before) ?Z)
           (<= ?0 (char-before) ?9))
@@ -179,7 +185,7 @@ insert a new subscript (e.g a -> a_1)."
   (and (or (<= ?a (char-before) ?z)
            (<= ?A (char-before) ?Z)
            (<= ?0 (char-before) ?9)
-           (memq (char-before) '(?\) ?\])))
+           (memq (char-before) '(?\) ?\] ?})))
        (texmathp)))
 
 ;; HACK smartparens runs after us on the global `post-self-insert-hook' and
