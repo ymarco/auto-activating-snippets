@@ -74,14 +74,15 @@ non-interactively."
 (defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
   "Bind KEY (string) as extended prefix in KEYMAP (keymap) to EXPANTION.
 
-EXPANTION must either be a string or an interactive function.
+EXPANTION must either be a string, an interactive function, or nil.
 CONDITION must be nil or a function."
-  (unless (or (stringp expansion) (functionp expansion))
-    (error "Expansion must be either a string or function"))
+  (unless (or (stringp expansion) (functionp expansion) (null expansion))
+    (error "Expansion must be either a string, function, or nil"))
   (unless (or (null condition) (functionp condition))
     (error "Condition must be either a string or function"))
   (define-key keymap key
-    (lambda () (als-expand-snippet-maybe key expansion condition))))
+    (when expansion
+     (lambda () (als-expand-snippet-maybe key expansion condition)))))
 
 (defun als-set-snippets (keymap &rest args)
   "Set multiple keys and expansions using KEYMAP as the tree to store in.
