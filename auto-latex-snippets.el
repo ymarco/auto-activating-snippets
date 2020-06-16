@@ -160,7 +160,7 @@ insert a new subscript (e.g a -> a_1)."
            (save-excursion
              (cl-loop do (backward-sexp)
                       while (= (char-before) ?}))
-             (looking-back "\\\\[A-Za-z]+\\*?" (- (point) 20))))
+             (looking-back "\\\\[A-Za-z@*]+" (- (point) 20))))
       (match-beginning 0))
      ((or (<= ?a (char-before) ?z)
           (<= ?A (char-before) ?Z)
