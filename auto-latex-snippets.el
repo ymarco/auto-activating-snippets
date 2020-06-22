@@ -133,8 +133,9 @@ insert a new subscript (e.g a -> a_1)."
 
 (defun als-auto-script-condition ()
   "Condition used for auto-sub/superscript snippets."
-  (cond ((or (= (char-before (1- (point))) ?_)
-             (= (char-before (1- (point))) ?^))
+  (cond ((and (or (= (char-before (1- (point))) ?_)
+                  (= (char-before (1- (point))) ?^))
+              (/= (char-before) ?{))
          'extended-sub)
         ((and
           ;; Before is some indexable char
