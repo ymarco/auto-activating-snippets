@@ -83,7 +83,7 @@ CONDITION must be nil or a function."
     (error "Condition must be either a string or function"))
   (define-key keymap key
     (when expansion
-     (lambda () (als-expand-snippet-maybe key expansion condition)))))
+      (lambda () (als-expand-snippet-maybe key expansion condition)))))
 
 (defun als-set-snippets (keymap &rest args)
   "Set multiple keys and expansions using KEYMAP as the tree to store in.
@@ -160,7 +160,7 @@ insert a new subscript (e.g a -> a_1)."
            (save-excursion
              (cl-loop do (backward-sexp)
                       while (= (char-before) ?}))
-             (looking-back "\\\\[A-Za-z@*]+" (- (point) 20))))
+             (looking-back "\\\\[A-Za-z@*]+" (line-beginning-position))))
       (match-beginning 0))
      ((or (<= ?a (char-before) ?z)
           (<= ?A (char-before) ?Z)
@@ -182,6 +182,7 @@ insert a new subscript (e.g a -> a_1)."
 
 (defun als-object-on-left-condition ()
   "Return t if there is a TeX object imidiately to the left."
+  ;; TODO use `als-identify-adjacent-tex-object'
   (and (or (<= ?a (char-before) ?z)
            (<= ?A (char-before) ?Z)
            (<= ?0 (char-before) ?9)
