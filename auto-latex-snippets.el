@@ -91,20 +91,17 @@ Return the keymap.
 
 The following keywords in ARGS are avaliable:
   :cond CONDITION         set the condition for the the following snippets
-  :cond-desc DESCRIPTION  set the description of the previously specified condition TODO
-  :desc                   set the description for the following snippet TODO
 
 For examples see the definition of `als-prefix-map'.
 
-\(fn KEYMAP [:desc :cond :cond-desc] KEY-EXPANSIONS)"
-  (let (item desc cond cond-desc)
+\(fn KEYMAP [:cond :expansion-desc] KEY-EXPANSIONS)"
+  (let (item cond)
     (while args
       (setq item (pop args))
       (if (keywordp item)
           (pcase item
-            (:desc      (setq desc      (pop args)))
-            (:cond      (setq cond      (pop args)))
-            (:cond-desc (setq cond-desc (pop args)))
+            (:cond (setq cond (pop args)))
+            ;; ignoring this
             (:expansion-desc  (pop args))
             (_ (error "Unknown keyword: %s" item)))
         ;; regular key-expansion
@@ -392,8 +389,6 @@ insert a new subscript (e.g a -> a_1)."
 (defvar als-frac-snippet
   (list
    :cond #'als-object-on-left-condition
-   :cond-desc "If LaTeX object immidiately to the left"
-   :desc "Smart fraction"
    "/" #'als-smart-fraction
    )
   "Frac snippet. Expand in maths when there's something to frac on on the left.")
