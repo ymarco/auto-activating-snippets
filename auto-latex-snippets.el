@@ -19,6 +19,7 @@
 ;;
 ;;; Code:
 
+(require 'cl-lib)
 (require 'texmathp)
 (require 'yasnippet)
 
@@ -364,48 +365,66 @@ insert a new subscript (e.g a -> a_1)."
   "Basic snippets. Expand only inside maths.")
 
 (defvar als-subscript-snippets
-  (list
-   :cond #'als-auto-script-condition
-   "ii"  #'als-insert-script
-   "ip1" "_{i+1}"
-   "jj"  #'als-insert-script
-   "jp1" "_{j+1}"
-   "nn"  #'als-insert-script
-   "np1" "_{n+1}"
-   "kk"  #'als-insert-script
-   "kp1" "_{k+1}"
-   "0"   #'als-insert-script
-   "1"   #'als-insert-script
-   "2"   #'als-insert-script
-   "3"   #'als-insert-script
-   "4"   #'als-insert-script
-   "5"   #'als-insert-script
-   "6"   #'als-insert-script
-   "7"   #'als-insert-script
-   "8"   #'als-insert-script
-   "9"   #'als-insert-script)
+  (nconc (list
+          :cond #'als-auto-script-condition)
+         (cl-loop for (key . exp) in '(("ii"  . als-insert-script)
+                                       ("ip1" . "_{i+1}")
+                                       ("jj"  . als-insert-script)
+                                       ("jp1" . "_{j+1}")
+                                       ("nn"  . als-insert-script)
+                                       ("np1" . "_{n+1}")
+                                       ("kk"  . als-insert-script)
+                                       ("kp1" . "_{k+1}")
+                                       ("0"   . als-insert-script)
+                                       ("1"   . als-insert-script)
+                                       ("2"   . als-insert-script)
+                                       ("3"   . als-insert-script)
+                                       ("4"   . als-insert-script)
+                                       ("5"   . als-insert-script)
+                                       ("6"   . als-insert-script)
+                                       ("7"   . als-insert-script)
+                                       ("8"   . als-insert-script)
+                                       ("9"   . als-insert-script))
+                  if (symbolp exp)
+                  collect :expansion-desc
+                  and collect (format "_%s, or _{X%s} if a subscript was typed already"
+                                      (substring key -1) (substring key -1))
+                  collect key collect exp))
   "Automatic subscripts! Expand In math and after a single letter.")
 
 (defvar als-frac-snippet
   (list
    :cond #'als-object-on-left-condition
-   "/" #'als-smart-fraction
-   )
+   :expansion-desc "Wrap object on the left with \\frac{}{}, leave `point' in the denuminator."
+   "/" #'als-smart-fraction)
   "Frac snippet. Expand in maths when there's something to frac on on the left.")
 
-(defvar als-accent-snippets
-  (list
-   ;; "to"  "\\to"
 
-   ;; accents
-   :cond #'als-object-on-left-condition
-   ". "  (lambda () (interactive) (als-wrap-previous-object "dot"))
-   ".. " (lambda () (interactive) (als-wrap-previous-object "dot"))
-   ",."  (lambda () (interactive) (als-wrap-previous-object "vec"))
-   ".,"  (lambda () (interactive) (als-wrap-previous-object "vec"))
-   "~ "  (lambda () (interactive) (als-wrap-previous-object "tilde"))
-   "hat" (lambda () (interactive) (als-wrap-previous-object "hat"))
-   "bar" (lambda () (interactive) (als-wrap-previous-object "overline")))
+(defvar als-accent-snippets
+  ;; This was initially done with a beautiful cl-loop, but yielding lambdas
+  ;; using the iteration variable screws things up since the variable is global
+  ;; throughout the loop. Example (the inner loop is problematic):
+  ;; (cl-loop for f in
+  ;;          (cl-loop for x in '(1 2 3)
+  ;;                   collect (lambda () x))
+  ;;          collect (funcall f))
+  `(:cond ,#'als-object-on-left-condition
+    .
+    ,(let (res)
+       (dolist (key-exp '((". " . "dot")
+                          (".. " . "dot")
+                          (",." . "vec")
+                          (".," . "vec")
+                          ("~ " . "tilde")
+                          ("hat" . "hat")
+                          ("bar" . "overline")))
+         (cl-destructuring-bind (key . exp) key-exp
+           ;; pushing in the opposite order
+           (push (lambda () (interactive) (als-wrap-previous-object exp)) res)
+           (push key res)
+           (push (format "Wrap in \\%s{}" exp) res)
+           (push :expansion-desc res)))
+       res))
   "A simpler way to apply accents. Expand If LaTeX symbol immidiately before point.")
 
 (defvar als-prefix-map
