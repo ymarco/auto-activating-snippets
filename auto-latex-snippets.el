@@ -499,5 +499,41 @@ See TODO for the availible snippets."
       (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
     (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook t)))
 
+
+
+(defun als--format-doc-to-org (thing)
+  "TODO. THING."
+  (replace-regexp-in-string
+   "`\\|'" "~"
+   (or (get thing 'variable-documentation)
+       (documentation thing))))
+
+(defun als--format-snippet-array (snippets)
+  "TODO. SNIPPETS."
+  (let (item expansion expansion-desc cond res)
+    (while snippets
+      (setq item (pop snippets))
+      (if (keywordp item)
+          (pcase item
+            (:expansion-desc  (setq expansion-desc (pop snippets)))
+            ;; ignore, assume the condition is recorded in the doscring of the
+            ;; var dolding this list
+            (:cond                                 (pop snippets))
+            (_ (error "Unknown keyword: %s" item)))
+        (let ((key item)
+              (expansion (pop snippets)))
+          (push
+           ;; replace | with unicode so org doesn't think its a table column
+           (list (replace-regexp-in-string
+                  "|" "❘"
+                  (replace-regexp-in-string " " "␣"  key))
+                 (or expansion-desc
+                     ;; just to be clear
+                     expansion))
+           res))
+        ;; expasion-desc is one per snippet
+        (setq expansion-desc nil)))
+    (nreverse res)))
+
 (provide 'auto-latex-snippets)
 ;;; auto-latex-snippets.el ends here

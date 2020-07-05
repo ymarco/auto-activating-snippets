@@ -1,28 +1,32 @@
 #+TITLE: Snippets
 
 #+BEGIN_SRC emacs-lisp
-(let ((snippets als-default-snippets)
-      item expansion desc cond-desc
-      res)
-  (while snippets
-    (setq item (pop snippets))
-    (if (keywordp item)
-        (pcase item
-          (:desc      (setq desc      (pop snippets)))
-          (:cond      (pop snippets)) ; no need to show condition whith :cond-desc
-          (:cond-desc (setq cond-desc (pop snippets)))
-          (_ (error "Unknown keyword: %s" item)))
-      (let ((key item)
-            (expansion (pop snippets)))
-        (push
-         ;; replace | with unicode so org doesn't think its a table column
-         (mapcar (lambda (s)
-                   (if (stringp s)
-                       (replace-regexp-in-string "|" "❘" s)
-                     s))
-                 (list key expansion cond-desc))
-         res))
-      ;; only need to show conditions once
-      (setq cond-desc "")))
-  (nreverse res))
+(als--format-doc-to-org 'als-subscript-snippets)
 #+END_SRC
+
+#+RESULTS:
+: Automatic subscripts! Expand In math and after a single letter.
+
+#+BEGIN_SRC emacs-lisp
+(als--format-snippet-array als-subscript-snippets)
+#+END_SRC
+
+#+RESULTS:
+|  ii | _i, or _{Xi} if a subscript was typed already |
+| ip1 | _{i+1}                                        |
+|  jj | _j, or _{Xj} if a subscript was typed already |
+| jp1 | _{j+1}                                        |
+|  nn | _n, or _{Xn} if a subscript was typed already |
+| np1 | _{n+1}                                        |
+|  kk | _k, or _{Xk} if a subscript was typed already |
+| kp1 | _{k+1}                                        |
+|   0 | _0, or _{X0} if a subscript was typed already |
+|   1 | _1, or _{X1} if a subscript was typed already |
+|   2 | _2, or _{X2} if a subscript was typed already |
+|   3 | _3, or _{X3} if a subscript was typed already |
+|   4 | _4, or _{X4} if a subscript was typed already |
+|   5 | _5, or _{X5} if a subscript was typed already |
+|   6 | _6, or _{X6} if a subscript was typed already |
+|   7 | _7, or _{X7} if a subscript was typed already |
+|   8 | _8, or _{X8} if a subscript was typed already |
+|   9 | _9, or _{X9} if a subscript was typed already |
