@@ -105,6 +105,7 @@ For examples see the definition of `als-prefix-map'.
             (:desc      (setq desc      (pop args)))
             (:cond      (setq cond      (pop args)))
             (:cond-desc (setq cond-desc (pop args)))
+            (:expansion-desc  (pop args))
             (_ (error "Unknown keyword: %s" item)))
         ;; regular key-expansion
         (let ((key item)
@@ -223,10 +224,9 @@ insert a new subscript (e.g a -> a_1)."
                         start end))
   (als--shut-up-smartparens))
 
-(defvar als-default-snippets
+(defvar als-basic-snippets
   (list
    :cond #'texmathp
-   :cond-desc "inside math"
    "!=" 	"\\neq"
    "!>" 	"\\mapsto"
    "**" 	"\\cdot"
@@ -363,17 +363,12 @@ insert a new subscript (e.g a -> a_1)."
    ";<"  "\\leftarrow"    ";;<" "\\longleftarrow"  ";;;<" "\\min"
    ";>"  "\\rightarrow"   ";;>" "\\longrightarrow" ";;;>" "\\max"
    ";'"  "\\prime"
-   ";."  "\\cdot"
+   ";."  "\\cdot")
+  "Basic snippets. Expand only inside maths.")
 
-   :cond #'als-object-on-left-condition
-   :cond-desc "If LaTeX object immidiately to the left"
-   :desc "Smart fraction"
-   "/" #'als-smart-fraction
-
-   ;; "to"  "\\to"
+(defvar als-subscript-snippets
+  (list
    :cond #'als-auto-script-condition
-   :cond-desc "In math and after a single letter"
-   :desc "Automatic subscripts"
    "ii"  #'als-insert-script
    "ip1" "_{i+1}"
    "jj"  #'als-insert-script
@@ -391,23 +386,40 @@ insert a new subscript (e.g a -> a_1)."
    "6"   #'als-insert-script
    "7"   #'als-insert-script
    "8"   #'als-insert-script
-   "9"   #'als-insert-script
+   "9"   #'als-insert-script)
+  "Automatic subscripts! Expand In math and after a single letter.")
 
-    ;; accents
-    :cond #'als-object-on-left-condition
-    :cond-desc "If LaTeX symbol immidiately before point."
-    :desc "A simpler way to apply accents"
-    ". "  (lambda () (interactive) (als-wrap-previous-object "dot"))
-    ".. " (lambda () (interactive) (als-wrap-previous-object "dot"))
-    ",."  (lambda () (interactive) (als-wrap-previous-object "vec"))
-    ".,"  (lambda () (interactive) (als-wrap-previous-object "vec"))
-    "~ "  (lambda () (interactive) (als-wrap-previous-object "tilde"))
-    "hat" (lambda () (interactive) (als-wrap-previous-object "hat"))
-    "bar" (lambda () (interactive) (als-wrap-previous-object "overline")))
-  "Default snippets, for use when defining `als-prefix-map'.")
+(defvar als-frac-snippet
+  (list
+   :cond #'als-object-on-left-condition
+   :cond-desc "If LaTeX object immidiately to the left"
+   :desc "Smart fraction"
+   "/" #'als-smart-fraction
+   )
+  "Frac snippet. Expand in maths when there's something to frac on on the left.")
+
+(defvar als-accent-snippets
+  (list
+   ;; "to"  "\\to"
+
+   ;; accents
+   :cond #'als-object-on-left-condition
+   ". "  (lambda () (interactive) (als-wrap-previous-object "dot"))
+   ".. " (lambda () (interactive) (als-wrap-previous-object "dot"))
+   ",."  (lambda () (interactive) (als-wrap-previous-object "vec"))
+   ".,"  (lambda () (interactive) (als-wrap-previous-object "vec"))
+   "~ "  (lambda () (interactive) (als-wrap-previous-object "tilde"))
+   "hat" (lambda () (interactive) (als-wrap-previous-object "hat"))
+   "bar" (lambda () (interactive) (als-wrap-previous-object "overline")))
+  "A simpler way to apply accents. Expand If LaTeX symbol immidiately before point.")
 
 (defvar als-prefix-map
-  (apply #'als-set-snippets (make-sparse-keymap) als-default-snippets)
+  (let ((keymap (make-sparse-keymap)))
+    (apply #'als-set-snippets keymap als-basic-snippets)
+    (apply #'als-set-snippets keymap als-subscript-snippets)
+    (apply #'als-set-snippets keymap als-frac-snippet)
+    (apply #'als-set-snippets keymap als-accent-snippets)
+    keymap)
   "Defalut snippet keymap.")
 
 (defvar-local als-current-prefix-maps nil
