@@ -402,30 +402,20 @@ insert a new subscript (e.g a -> a_1)."
 
 
 (defvar als-accent-snippets
-  ;; This was initially done with a beautiful cl-loop, but yielding lambdas
-  ;; using the iteration variable screws things up since the variable is global
-  ;; throughout the loop. Example (the inner loop is problematic):
-  ;; (cl-loop for f in
-  ;;          (cl-loop for x in '(1 2 3)
-  ;;                   collect (lambda () x))
-  ;;          collect (funcall f))
   `(:cond ,#'als-object-on-left-condition
     .
-    ,(let (res)
-       (dolist (key-exp '((". " . "dot")
-                          (".. " . "dot")
-                          (",." . "vec")
-                          (".," . "vec")
-                          ("~ " . "tilde")
-                          ("hat" . "hat")
-                          ("bar" . "overline")))
-         (cl-destructuring-bind (key . exp) key-exp
-           ;; pushing in the opposite order
-           (push (lambda () (interactive) (als-wrap-previous-object exp)) res)
-           (push key res)
-           (push (format "Wrap in \\%s{}" exp) res)
-           (push :expansion-desc res)))
-       res))
+    ,(cl-loop for (key . exp) in '((". " . "dot")
+                                  (".. " . "dot")
+                                  (",." . "vec")
+                                  (".," . "vec")
+                                  ("~ " . "tilde")
+                                  ("hat" . "hat")
+                                  ("bar" . "overline"))
+             collect :expansion-desc
+             collect (format "Wrap in \\%s{}" exp)
+             collect key
+             ;; re-bind exp so its not changed in the next iteration
+             collect (let ((expp exp)) (lambda () (interactive) (als-wrap-previous-object expp)))))
   "A simpler way to apply accents. Expand If LaTeX symbol immidiately before point.")
 
 (defvar als-prefix-map
