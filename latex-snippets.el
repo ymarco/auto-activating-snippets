@@ -1,4 +1,27 @@
-;;; packages/Auto-LaTeX-Snippets/latex-snippets.el -*- lexical-binding: t; -*-
+;;; latex-snippets.el --- TODO -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2020 Yoav Marco
+;;
+;; Author: Yoav Marco <http://github/yoavm448>
+;; Maintainer: Yoav Marco <yoavm448@gmail.com>
+;; Created: September 22, 2020
+;; Modified: September 22, 2020
+;; Version: 0.0.1
+;; Keywords:
+;; Homepage: https://github.com/tecosaur/auto-latex-snippets
+;; Package-Requires: ((emacs 28.0.50) (cl-lib "0.5") (yasnippet 0.14))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  TODO
+;;
+;;; Code:
+
+(require 'auto-latex-snippets)
+(require 'texmathp)
+(require 'yasnippet)
 
 (defun als-current-snippet-insert-post-space-if-wanted ()
   (when (and (stringp als-transient-snippet-expansion)
@@ -321,11 +344,10 @@ insert a new subscript (e.g a -> a_1)."
                                          (als-wrap-previous-object expp)))))
   "A simpler way to apply accents. Expand If LaTeX symbol immidiately before point.")
 
-(defvar als-prefix-map
-  (let ((keymap (make-sparse-keymap)))
-    (apply #'als-set-snippets keymap als-basic-snippets)
-    (apply #'als-set-snippets keymap als-subscript-snippets)
-    (apply #'als-set-snippets keymap als-frac-snippet)
-    (apply #'als-set-snippets keymap als-accent-snippets)
-    keymap)
-  "Defalut snippet keymap.")
+(apply #'als-set-snippets 'latex-mode als-basic-snippets)
+(apply #'als-set-snippets 'latex-mode als-subscript-snippets)
+(apply #'als-set-snippets 'latex-mode als-frac-snippet)
+(apply #'als-set-snippets 'latex-mode als-accent-snippets)
+
+(provide 'latex-snippets)
+;;; latex-snippets.el ends here

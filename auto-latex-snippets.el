@@ -9,7 +9,7 @@
 ;; Version: 0.0.1
 ;; Keywords:
 ;; Homepage: https://github.com/tecosaur/auto-latex-snippets
-;; Package-Requires: ((emacs 26.1) (cl-lib "0.5") (yasnippet 0.14))
+;; Package-Requires: ((emacs 26.1) (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -20,19 +20,17 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'texmathp)
-(require 'yasnippet)
 
 (defvar als-pre-snippet-expand-hook nil
   "Hooks to run just before expanding snippets.")
 (defvar als-post-snippet-expand-hook nil
   "Hooks to run just after expanding snippets.")
 
-(defvar als-transient-snippet-key nil
+(defvar-local als-transient-snippet-key nil
   "KEY of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
-(defvar als-transient-snippet-expansion nil
+(defvar-local als-transient-snippet-expansion nil
   "EXPANSION of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
-(defvar als-transient-snippet-condition-result nil
+(defvar-local als-transient-snippet-condition-result nil
   "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
 
 (defun als-expand-snippet-maybe (key expansion &optional condition)
@@ -64,8 +62,6 @@ non-interactively."
     (run-hooks 'als-post-snippet-expand-hook)
     t))
 
-
-
 (defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
   "Bind KEY (string) as extended prefix in KEYMAP (keymap) to EXPANTION.
 
@@ -79,18 +75,19 @@ CONDITION must be nil or a function."
     (when expansion
       (lambda () (als-expand-snippet-maybe key expansion condition)))))
 
-(defun als-set-snippets (keymap &rest args)
-  "Set multiple keys and expansions using KEYMAP as the tree to store in.
+(defun als-set-snippets (name &rest args)
+  "Define snippets for NAME (a symbol entry to als-keymaps).
 
-Return the keymap.
+NAME should be later used in `als-activate-keymap' and such.
 
 The following keywords in ARGS are avaliable:
   :cond CONDITION         set the condition for the the following snippets
 
-For examples see the definition of `als-prefix-map'.
+For examples see the definition of `als--prefix-map'.
 
 \(fn KEYMAP [:cond :expansion-desc] KEY-EXPANSIONS)"
-  (let (item cond)
+  (let ((keymap (or (gethash name als-keymaps) (make-sparse-keymap)))
+        item cond)
     (while args
       (setq item (pop args))
       (if (keywordp item)
@@ -102,11 +99,13 @@ For examples see the definition of `als-prefix-map'.
         ;; regular key-expansion
         (let ((key item)
               (expansion (pop args)))
-          (als-define-prefix-map-snippet keymap key expansion cond)))))
-  keymap)
+          (als-define-prefix-map-snippet keymap key expansion cond))))
+    (puthash name keymap als-keymaps)))
 
+(defvar-local als--prefix-map nil
+  "Defalut full snippet keymap.")
 
-(defvar-local als-current-prefix-maps nil
+(defvar-local als--current-prefix-maps nil
   "Global variable to keep track of the current user path trace of snippets.
 
 Gets updated by `als-post-self-insert-hook'.")
@@ -114,10 +113,10 @@ Gets updated by `als-post-self-insert-hook'.")
 (defun als-post-self-insert-hook ()
   "Try to expand snippets automatically.
 
-Use for the typing history, `als-current-prefix-maps' and
+Use for the typing history, `als--current-prefix-maps' and
 `this-command-keys' for the current typed key.."
-  (setq als-current-prefix-maps (nconc als-current-prefix-maps (list als-prefix-map)))
-  (let ((current-map-sublist als-current-prefix-maps)
+  (setq als--current-prefix-maps (nconc als--current-prefix-maps (list als--prefix-map)))
+  (let ((current-map-sublist als--current-prefix-maps)
         current-map
         key-result
         prev)
@@ -128,7 +127,7 @@ Use for the typing history, `als-current-prefix-maps' and
              ;; remove dead end from the list
              (if prev
                  (setcdr prev (cdr current-map-sublist))
-               (setq als-current-prefix-maps (cdr als-current-prefix-maps))))
+               (setq als--current-prefix-maps (cdr als--current-prefix-maps))))
             ((keymapp key-result)
              ;; update tree
              (setcar current-map-sublist key-result))
@@ -138,11 +137,11 @@ Use for the typing history, `als-current-prefix-maps' and
              (if (funcall key-result)
                  ;; condition evaluated to true, and snipped expanded!
                  (setq current-map-sublist nil      ; stop the loop
-                       als-current-prefix-maps nil) ; abort all other snippest
+                       als--current-prefix-maps nil) ; abort all other snippest
                ;; unseccesfull. remove dead end from the list
                (if prev
                    (setcdr prev (cdr current-map-sublist))
-                 (setq als-current-prefix-maps (cdr als-current-prefix-maps))))))
+                 (setq als--current-prefix-maps (cdr als--current-prefix-maps))))))
       ;; proceed loop
       (setq prev current-map-sublist
             current-map-sublist (cdr-safe current-map-sublist)))))
@@ -150,25 +149,67 @@ Use for the typing history, `als-current-prefix-maps' and
 (defun als--debug-print-tree-options ()
   "Print debug info about what entries into the tree are currently kept track of."
   (message "%s entries: %s"
-           (length als-current-prefix-maps)
+           (length als--current-prefix-maps)
            (mapcar (lambda (kmap)
                      (apply #'string (sort (mapcar (lambda (key-and-binding)
                                                      (car key-and-binding))
                                                    (cdr kmap))
                                            #'<)))
-                   als-current-prefix-maps)))
+                   als--current-prefix-maps)))
 
+(defvar als-keymaps (make-hash-table :test #'eq)
+  "Hash table of all snippet keymaps, in the format of symbol:keymap.")
+
+(defvar-local als-active-keymaps nil
+  "List of symbols of the active keymaps. Each symbol should be
+present as a key in `als-keymaps'.")
+
+;;;###autoload
+(defun als-activate-keymap (keymap-symbol)
+  "Add KEYMAP-SYMBOL to the list of active snippet keymaps.
+
+Return non-nil if that keymap actually exists and was added.
+Otherwise return nil."
+  (when (gethash keymap-symbol als-keymaps)
+    (add-to-list 'als-active-keymaps keymap-symbol)
+    (setq als--prefix-map (make-composed-keymap
+                           (mapcar (lambda (x) (gethash x als-keymaps))
+                                   als-active-keymaps)))))
+
+(defun als-deactivate-keymap (keymap-symbol)
+  "Remove `keymap' from the list of active keymaps."
+  (delq keymap-symbol als-active-keymaps)
+  (setq als--prefix-map (make-composed-keymap
+                         (mapcar (lambda (x) (gethash x als-keymaps))
+                                 als-active-keymaps))))
+
+;;;###autoload
+(defun als-activate-major-mode-snippets ()
+  "Activate snippets for current `major-mode'."
+  (als-activate-keymap major-mode))
+
+
+(defun als--modes-to-activate (mode)
+  "Return the list of ancestors for MODE.
+(als--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
+  (let ((res nil))
+    (while (not (eq mode 'fundamental-mode))
+      (push mode res)
+      (setq mode (or (get mode 'derived-mode-parent)
+                     'fundamental-mode)))
+    res))
 ;;;###autoload
 (define-minor-mode auto-latex-snippets-mode
   "Minor mode for dynamically auto-expanding LaTeX snippets.
 
 See TODO for the availible snippets."
   :init-value nil
+
   (if auto-latex-snippets-mode
-      (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t)
+      (progn
+        (mapc #'als-activate-keymap (als--modes-to-activate major-mode))
+        (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t))
     (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook t)))
-
-
 
 (defun als--format-doc-to-org (thing)
   "Format documentation of THING in org-mode syntax."
