@@ -1,4 +1,4 @@
-;;; latex-snippets.el --- TODO -*- lexical-binding: t; -*-
+;;; latex-auto-activating-snippets.el --- TODO -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2020 Yoav Marco
 ;;
@@ -8,7 +8,7 @@
 ;; Modified: September 22, 2020
 ;; Version: 0.0.1
 ;; Keywords:
-;; Homepage: https://github.com/tecosaur/auto-latex-snippets
+;; Homepage: https://github.com/tecosaur/auto-latex-auto-activating-snippets
 ;; Package-Requires: ((emacs 28.0.50) (cl-lib "0.5") (yasnippet 0.14))
 ;;
 ;; This file is not part of GNU Emacs.
@@ -23,29 +23,29 @@
 (require 'texmathp)
 (require 'yasnippet)
 
-(defun als-current-snippet-insert-post-space-if-wanted ()
-  (when (and (stringp als-transient-snippet-expansion)
-             (= ?\\ (aref als-transient-snippet-expansion 0))
+(defun laas-current-snippet-insert-post-space-if-wanted ()
+  (when (and (stringp aas-transient-snippet-expansion)
+             (= ?\\ (aref aas-transient-snippet-expansion 0))
              (not (memq (char-after) '(?\) ?\]))))
     (insert " ")))
 
 (add-hook 'LaTeX-mode-hook
           (lambda ()
-            (add-hook 'als-post-snippet-expand-hook
-                      #'als-current-snippet-insert-post-space-if-wanted
+            (add-hook 'aas-post-snippet-expand-hook
+                      #'laas-current-snippet-insert-post-space-if-wanted
                       nil t)))
 
 
 
-(defun als-insert-script (s)
+(defun laas-insert-script (s)
   "Add a subscript with a text of S (string).
 
-Rely on `als-transient-snippet-condition-result' to contain the
-result of `als-auto-script-condition' which gives the info
+Rely on `aas-transient-snippet-condition-result' to contain the
+result of `aas-auto-script-condition' which gives the info
 whether to extend an existing subscript (e.g a_1 -> a_{1n}) or
 insert a new subscript (e.g a -> a_1)."
   (interactive (list (this-command-keys)))
-  (pcase als-transient-snippet-condition-result
+  (pcase aas-transient-snippet-condition-result
     ;; new subscript after a letter
     ('one-sub
      (insert "_" s))
@@ -56,7 +56,7 @@ insert a new subscript (e.g a -> a_1)."
      (forward-char)
      (insert s "}"))))
 
-(defun als-auto-script-condition ()
+(defun laas-auto-script-condition ()
   "Condition used for auto-sub/superscript snippets."
   (cond ((and (or (= (char-before (1- (point))) ?_)
                   (= (char-before (1- (point))) ?^))
@@ -73,7 +73,7 @@ insert a new subscript (e.g a -> a_1)."
           (texmathp))
          'one-sub)))
 
-(defun als-identify-adjacent-tex-object (&optional point)
+(defun laas-identify-adjacent-tex-object (&optional point)
   "Return the startig position of the left-adjacent TeX object from POINT."
   (save-excursion
     (goto-char (or point (point)))
@@ -94,20 +94,20 @@ insert a new subscript (e.g a -> a_1)."
       (when (= (char-before) ?\\) (backward-char))
       (point)))))
 
-(defun als-wrap-previous-object (tex-command)
+(defun laas-wrap-previous-object (tex-command)
   "Wrap previous TeX object in TEX-COMMAND."
   (interactive)
-  (let ((start (als-identify-adjacent-tex-object)))
+  (let ((start (laas-identify-adjacent-tex-object)))
     (insert "}")
-    (when (aref als-transient-snippet-key (1- (length als-transient-snippet-key)))
+    (when (aref aas-transient-snippet-key (1- (length aas-transient-snippet-key)))
       (insert " "))
     (save-excursion
       (goto-char start)
       (insert (concat "\\" tex-command "{")))))
 
-(defun als-object-on-left-condition ()
+(defun aas-object-on-left-condition ()
   "Return t if there is a TeX object imidiately to the left."
-  ;; TODO use `als-identify-adjacent-tex-object'
+  ;; TODO use `laas-identify-adjacent-tex-object'
   (and (or (<= ?a (char-before) ?z)
            (<= ?A (char-before) ?Z)
            (<= ?0 (char-before) ?9)
@@ -118,7 +118,7 @@ insert a new subscript (e.g a -> a_1)."
 ;;      thinks that because a { was inserted after a self-insert event that it
 ;;      should insert the matching } even though we took care of that.
 ;; TODO check it without `smartparens-global-mode' as well
-(defun als--shut-up-smartparens ()
+(defun laas--shut-up-smartparens ()
   "Make sure `smartparens' doesn't mess up after snippet expanding to parentheses."
   (when (bound-and-true-p smartparens-mode)
     (let ((gpsih (default-value 'post-self-insert-hook)))
@@ -129,10 +129,10 @@ insert a new subscript (e.g a -> a_1)."
               (setq-default post-self-insert-hook gpsih))
             post-self-insert-hook))))
 
-(defun als-smart-fraction ()
+(defun laas-smart-fraction ()
   "Expansion function used for auto-subscript snippets."
   (interactive)
-  (let* ((tex-obj (als-identify-adjacent-tex-object))
+  (let* ((tex-obj (laas-identify-adjacent-tex-object))
          (start (save-excursion
                   ;; if bracketed, delete outermost brackets
                   (if (memq (char-before) '(?\) ?\]))
@@ -146,9 +146,9 @@ insert a new subscript (e.g a -> a_1)."
          (content (buffer-substring-no-properties start end)))
     (yas-expand-snippet (format "\\frac{%s}{$1}$0" content)
                         start end))
-  (als--shut-up-smartparens))
+  (laas--shut-up-smartparens))
 
-(defvar als-basic-snippets
+(defvar laas-basic-snippets
   (list
    :cond #'texmathp
    "!=" 	"\\neq"
@@ -290,27 +290,27 @@ insert a new subscript (e.g a -> a_1)."
    ";."  "\\cdot")
   "Basic snippets. Expand only inside maths.")
 
-(defvar als-subscript-snippets
+(defvar laas-subscript-snippets
   (nconc (list
-          :cond #'als-auto-script-condition)
-         (cl-loop for (key . exp) in '(("ii"  . als-insert-script)
+          :cond #'laas-auto-script-condition)
+         (cl-loop for (key . exp) in '(("ii"  . laas-insert-script)
                                        ("ip1" . "_{i+1}")
-                                       ("jj"  . als-insert-script)
+                                       ("jj"  . laas-insert-script)
                                        ("jp1" . "_{j+1}")
-                                       ("nn"  . als-insert-script)
+                                       ("nn"  . laas-insert-script)
                                        ("np1" . "_{n+1}")
-                                       ("kk"  . als-insert-script)
+                                       ("kk"  . laas-insert-script)
                                        ("kp1" . "_{k+1}")
-                                       ("0"   . als-insert-script)
-                                       ("1"   . als-insert-script)
-                                       ("2"   . als-insert-script)
-                                       ("3"   . als-insert-script)
-                                       ("4"   . als-insert-script)
-                                       ("5"   . als-insert-script)
-                                       ("6"   . als-insert-script)
-                                       ("7"   . als-insert-script)
-                                       ("8"   . als-insert-script)
-                                       ("9"   . als-insert-script))
+                                       ("0"   . laas-insert-script)
+                                       ("1"   . laas-insert-script)
+                                       ("2"   . laas-insert-script)
+                                       ("3"   . laas-insert-script)
+                                       ("4"   . laas-insert-script)
+                                       ("5"   . laas-insert-script)
+                                       ("6"   . laas-insert-script)
+                                       ("7"   . laas-insert-script)
+                                       ("8"   . laas-insert-script)
+                                       ("9"   . laas-insert-script))
                   if (symbolp exp)
                   collect :expansion-desc
                   and collect (format "_%s, or _{X%s} if a subscript was typed already"
@@ -318,16 +318,16 @@ insert a new subscript (e.g a -> a_1)."
                   collect key collect exp))
   "Automatic subscripts! Expand In math and after a single letter.")
 
-(defvar als-frac-snippet
+(defvar laas-frac-snippet
   (list
-   :cond #'als-object-on-left-condition
+   :cond #'aas-object-on-left-condition
    :expansion-desc "Wrap object on the left with \\frac{}{}, leave `point' in the denuminator."
-   "/" #'als-smart-fraction)
+   "/" #'laas-smart-fraction)
   "Frac snippet. Expand in maths when there's something to frac on on the left.")
 
 
-(defvar als-accent-snippets
-  `(:cond ,#'als-object-on-left-condition
+(defvar laas-accent-snippets
+  `(:cond ,#'aas-object-on-left-condition
     .
     ,(cl-loop for (key . exp) in '((". " . "dot")
                                   (".. " . "dot")
@@ -341,13 +341,14 @@ insert a new subscript (e.g a -> a_1)."
              collect key
              ;; re-bind exp so its not changed in the next iteration
              collect (let ((expp exp)) (lambda () (interactive)
-                                         (als-wrap-previous-object expp)))))
+                                         (laas-wrap-previous-object expp)))))
   "A simpler way to apply accents. Expand If LaTeX symbol immidiately before point.")
 
-(apply #'als-set-snippets 'latex-mode als-basic-snippets)
-(apply #'als-set-snippets 'latex-mode als-subscript-snippets)
-(apply #'als-set-snippets 'latex-mode als-frac-snippet)
-(apply #'als-set-snippets 'latex-mode als-accent-snippets)
+(apply #'aas-set-snippets 'latex-mode laas-basic-snippets)
+(apply #'aas-set-snippets 'latex-mode laas-subscript-snippets)
+nil
+(apply #'aas-set-snippets 'latex-mode laas-frac-snippet)
+(apply #'aas-set-snippets 'latex-mode laas-accent-snippets)
 
-(provide 'latex-snippets)
-;;; latex-snippets.el ends here
+(provide 'latex-auto-activating-snippets)
+;;; latex-auto-activating-snippets.el ends here
