@@ -476,7 +476,7 @@ Use for the typing history, `als-current-prefix-maps' and
                      (apply #'string (sort (mapcar (lambda (key-and-binding)
                                                      (car key-and-binding))
                                                    (cdr kmap))
-                                           '<)))
+                                           #'<)))
                    als-current-prefix-maps)))
 
 ;;;###autoload
@@ -500,7 +500,7 @@ See TODO for the availible snippets."
 
 (defun als--format-snippet-array (snippets)
   "TODO. SNIPPETS."
-  (let (item expansion expansion-desc cond res)
+  (let (item expansion-desc res)
     (while snippets
       (setq item (pop snippets))
       (if (keywordp item)
