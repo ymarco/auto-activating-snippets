@@ -1,4 +1,4 @@
-;;; auto-latex-snippets.el --- automatic expansion of latex macros -*- lexical-binding: t; -*-
+;;; auto-activating-snippets.el --- snippet expansions mid-typing -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2020 Yoav Marco
 ;;
@@ -8,32 +8,32 @@
 ;; Modified: April 17, 2020
 ;; Version: 0.0.1
 ;; Keywords:
-;; Homepage: https://github.com/tecosaur/auto-latex-snippets
+;; Homepage: https://github.com/tecosaur/auto-activating-snippets
 ;; Package-Requires: ((emacs 26.1) (cl-lib "0.5"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; Commentary:
 ;;
-;;  automatic expansion of latex macros
+;;  automatic expansion of snippets
 ;;
 ;;; Code:
 
 (require 'cl-lib)
 
-(defvar als-pre-snippet-expand-hook nil
+(defvar aas-pre-snippet-expand-hook nil
   "Hooks to run just before expanding snippets.")
-(defvar als-post-snippet-expand-hook nil
+(defvar aas-post-snippet-expand-hook nil
   "Hooks to run just after expanding snippets.")
 
-(defvar-local als-transient-snippet-key nil
-  "KEY of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
-(defvar-local als-transient-snippet-expansion nil
-  "EXPANSION of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
-(defvar-local als-transient-snippet-condition-result nil
-  "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `als-pre-snippet-expand-hook' and `als-post-snippet-expand-hook'.")
+(defvar-local aas-transient-snippet-key nil
+  "KEY of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
+(defvar-local aas-transient-snippet-expansion nil
+  "EXPANSION of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
+(defvar-local aas-transient-snippet-condition-result nil
+  "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
 
-(defun als-expand-snippet-maybe (key expansion &optional condition)
+(defun aas-expand-snippet-maybe (key expansion &optional condition)
   "Expand snippet with KEY as EXPANSION.
 
 When CONDITION is a function, call it (from the position in the
@@ -42,9 +42,9 @@ nil. CONDITION is expected not to modify the buffer.
 
 EXPANTION is called interactively, and CONDITION
 non-interactively."
-  (when-let ((als-transient-snippet-key key)
-             (als-transient-snippet-expansion expansion)
-             (als-transient-snippet-condition-result
+  (when-let ((aas-transient-snippet-key key)
+             (aas-transient-snippet-expansion expansion)
+             (aas-transient-snippet-condition-result
               (and
                ;; key was fully typed
                (save-excursion
@@ -55,14 +55,14 @@ non-interactively."
                    (prog1 (funcall condition)
                      (forward-char (length key)))))))
     (delete-char (- (length key)))
-    (run-hooks 'als-pre-snippet-expand-hook)
+    (run-hooks 'aas-pre-snippet-expand-hook)
     (if (functionp expansion)
         (call-interactively expansion)
       (insert expansion))
-    (run-hooks 'als-post-snippet-expand-hook)
+    (run-hooks 'aas-post-snippet-expand-hook)
     t))
 
-(defun als-define-prefix-map-snippet (keymap key expansion &optional condition)
+(defun aas-define-prefix-map-snippet (keymap key expansion &optional condition)
   "Bind KEY (string) as extended prefix in KEYMAP (keymap) to EXPANTION.
 
 EXPANTION must either be a string, an interactive function, or nil.
@@ -73,20 +73,20 @@ CONDITION must be nil or a function."
     (error "Condition must be either a string or function"))
   (define-key keymap key
     (when expansion
-      (lambda () (als-expand-snippet-maybe key expansion condition)))))
+      (lambda () (aas-expand-snippet-maybe key expansion condition)))))
 
-(defun als-set-snippets (name &rest args)
-  "Define snippets for NAME (a symbol entry to als-keymaps).
+(defun aas-set-snippets (name &rest args)
+  "Define snippets for NAME (a symbol entry to aas-keymaps).
 
-NAME should be later used in `als-activate-keymap' and such.
+NAME should be later used in `aas-activate-keymap' and such.
 
 The following keywords in ARGS are avaliable:
   :cond CONDITION         set the condition for the the following snippets
 
-For examples see the definition of `als--prefix-map'.
+For examples see the definition of `aas--prefix-map'.
 
 \(fn KEYMAP [:cond :expansion-desc] KEY-EXPANSIONS)"
-  (let ((keymap (or (gethash name als-keymaps) (make-sparse-keymap)))
+  (let ((keymap (or (gethash name aas-keymaps) (make-sparse-keymap)))
         item cond)
     (while args
       (setq item (pop args))
@@ -99,24 +99,24 @@ For examples see the definition of `als--prefix-map'.
         ;; regular key-expansion
         (let ((key item)
               (expansion (pop args)))
-          (als-define-prefix-map-snippet keymap key expansion cond))))
-    (puthash name keymap als-keymaps)))
+          (aas-define-prefix-map-snippet keymap key expansion cond))))
+    (puthash name keymap aas-keymaps)))
 
-(defvar-local als--prefix-map nil
+(defvar-local aas--prefix-map nil
   "Defalut full snippet keymap.")
 
-(defvar-local als--current-prefix-maps nil
+(defvar-local aas--current-prefix-maps nil
   "Global variable to keep track of the current user path trace of snippets.
 
-Gets updated by `als-post-self-insert-hook'.")
+Gets updated by `aas-post-self-insert-hook'.")
 
-(defun als-post-self-insert-hook ()
+(defun aas-post-self-insert-hook ()
   "Try to expand snippets automatically.
 
-Use for the typing history, `als--current-prefix-maps' and
+Use for the typing history, `aas--current-prefix-maps' and
 `this-command-keys' for the current typed key.."
-  (setq als--current-prefix-maps (nconc als--current-prefix-maps (list als--prefix-map)))
-  (let ((current-map-sublist als--current-prefix-maps)
+  (setq aas--current-prefix-maps (nconc aas--current-prefix-maps (list aas--prefix-map)))
+  (let ((current-map-sublist aas--current-prefix-maps)
         current-map
         key-result
         prev)
@@ -127,71 +127,71 @@ Use for the typing history, `als--current-prefix-maps' and
              ;; remove dead end from the list
              (if prev
                  (setcdr prev (cdr current-map-sublist))
-               (setq als--current-prefix-maps (cdr als--current-prefix-maps))))
+               (setq aas--current-prefix-maps (cdr aas--current-prefix-maps))))
             ((keymapp key-result)
              ;; update tree
              (setcar current-map-sublist key-result))
             ((functionp key-result)
-             ;; an ending! no need to call interactively,`als-expand-snippet-maybe'
+             ;; an ending! no need to call interactively,`aas-expand-snippet-maybe'
              ;; takes care of that
              (if (funcall key-result)
                  ;; condition evaluated to true, and snipped expanded!
                  (setq current-map-sublist nil      ; stop the loop
-                       als--current-prefix-maps nil) ; abort all other snippest
+                       aas--current-prefix-maps nil) ; abort all other snippest
                ;; unseccesfull. remove dead end from the list
                (if prev
                    (setcdr prev (cdr current-map-sublist))
-                 (setq als--current-prefix-maps (cdr als--current-prefix-maps))))))
+                 (setq aas--current-prefix-maps (cdr aas--current-prefix-maps))))))
       ;; proceed loop
       (setq prev current-map-sublist
             current-map-sublist (cdr-safe current-map-sublist)))))
 
-(defun als--debug-print-tree-options ()
+(defun aas--debug-print-tree-options ()
   "Print debug info about what entries into the tree are currently kept track of."
   (message "%s entries: %s"
-           (length als--current-prefix-maps)
+           (length aas--current-prefix-maps)
            (mapcar (lambda (kmap)
                      (apply #'string (sort (mapcar (lambda (key-and-binding)
                                                      (car key-and-binding))
                                                    (cdr kmap))
                                            #'<)))
-                   als--current-prefix-maps)))
+                   aas--current-prefix-maps)))
 
-(defvar als-keymaps (make-hash-table :test #'eq)
+(defvar aas-keymaps (make-hash-table :test #'eq)
   "Hash table of all snippet keymaps, in the format of symbol:keymap.")
 
-(defvar-local als-active-keymaps nil
+(defvar-local aas-active-keymaps nil
   "List of symbols of the active keymaps. Each symbol should be
-present as a key in `als-keymaps'.")
+present as a key in `aas-keymaps'.")
 
 ;;;###autoload
-(defun als-activate-keymap (keymap-symbol)
+(defun aas-activate-keymap (keymap-symbol)
   "Add KEYMAP-SYMBOL to the list of active snippet keymaps.
 
 Return non-nil if that keymap actually exists and was added.
 Otherwise return nil."
-  (when (gethash keymap-symbol als-keymaps)
-    (add-to-list 'als-active-keymaps keymap-symbol)
-    (setq als--prefix-map (make-composed-keymap
-                           (mapcar (lambda (x) (gethash x als-keymaps))
-                                   als-active-keymaps)))))
+  (when (gethash keymap-symbol aas-keymaps)
+    (add-to-list 'aas-active-keymaps keymap-symbol)
+    (setq aas--prefix-map (make-composed-keymap
+                           (mapcar (lambda (x) (gethash x aas-keymaps))
+                                   aas-active-keymaps)))))
 
-(defun als-deactivate-keymap (keymap-symbol)
+(defun aas-deactivate-keymap (keymap-symbol)
   "Remove `keymap' from the list of active keymaps."
-  (delq keymap-symbol als-active-keymaps)
-  (setq als--prefix-map (make-composed-keymap
-                         (mapcar (lambda (x) (gethash x als-keymaps))
-                                 als-active-keymaps))))
+  (delq keymap-symbol aas-active-keymaps)
+  (setq aas--prefix-map (make-composed-keymap
+                         (mapcar (lambda (x) (gethash x aas-keymaps))
+                                 aas-active-keymaps))))
 
 ;;;###autoload
-(defun als-activate-major-mode-snippets ()
+(defun aas-activate-major-mode-snippets ()
   "Activate snippets for current `major-mode'."
-  (als-activate-keymap major-mode))
+  (aas-activate-keymap major-mode))
 
 
-(defun als--modes-to-activate (mode)
+(defun aas--modes-to-activate (mode)
   "Return the list of ancestors for MODE.
-(als--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
+(aas--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
   (let ((res nil))
     (while (not (eq mode 'fundamental-mode))
       (push mode res)
@@ -199,29 +199,29 @@ Otherwise return nil."
                      'fundamental-mode)))
     res))
 ;;;###autoload
-(define-minor-mode auto-latex-snippets-mode
-  "Minor mode for dynamically auto-expanding LaTeX snippets.
+(define-minor-mode auto-activating-snippets-mode
+  "Minor mode for dynamically auto-expanding snippets.
 
 See TODO for the availible snippets."
   :init-value nil
 
-  (if auto-latex-snippets-mode
+  (if auto-activating-snippets-mode
       (progn
-        (mapc #'als-activate-keymap (als--modes-to-activate major-mode))
-        (add-hook 'post-self-insert-hook #'als-post-self-insert-hook 0 t))
-    (remove-hook 'post-self-insert-hook #'als-post-self-insert-hook t)))
+        (mapc #'aas-activate-keymap (aas--modes-to-activate major-mode))
+        (add-hook 'post-self-insert-hook #'aas-post-self-insert-hook 0 t))
+    (remove-hook 'post-self-insert-hook #'aas-post-self-insert-hook t)))
 
-(defun als--format-doc-to-org (thing)
+(defun aas--format-doc-to-org (thing)
   "Format documentation of THING in org-mode syntax."
   (replace-regexp-in-string
    "`\\|'" "~"
    (or (get thing 'variable-documentation)
        (documentation thing))))
 
-(defun als--format-snippet-array (snippets)
+(defun aas--format-snippet-array (snippets)
   "Format SNIPPETS to a 2D list of key-expansion.
 
-SNIPPETS should resemble an input to `als-set-snippets'."
+SNIPPETS should resemble an input to `aas-set-snippets'."
   (let (item expansion-desc res)
     (while snippets
       (setq item (pop snippets))
@@ -247,5 +247,5 @@ SNIPPETS should resemble an input to `als-set-snippets'."
         (setq expansion-desc nil)))
     (nreverse res)))
 
-(provide 'auto-latex-snippets)
-;;; auto-latex-snippets.el ends here
+(provide 'auto-activating-snippets)
+;;; auto-activating-snippets.el ends here

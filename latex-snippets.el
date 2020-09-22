@@ -19,7 +19,7 @@
 ;;
 ;;; Code:
 
-(require 'auto-latex-snippets)
+(require 'auto-activating-snippets)
 (require 'texmathp)
 (require 'yasnippet)
 
