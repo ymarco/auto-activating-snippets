@@ -492,14 +492,16 @@ See TODO for the availible snippets."
 
 
 (defun als--format-doc-to-org (thing)
-  "TODO. THING."
+  "Format documentation of THING in org-mode syntax."
   (replace-regexp-in-string
    "`\\|'" "~"
    (or (get thing 'variable-documentation)
        (documentation thing))))
 
 (defun als--format-snippet-array (snippets)
-  "TODO. SNIPPETS."
+  "Format SNIPPETS to a 2D list of key-expansion.
+
+SNIPPETS should resemble an input to `als-set-snippets'."
   (let (item expansion-desc res)
     (while snippets
       (setq item (pop snippets))
