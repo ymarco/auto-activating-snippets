@@ -313,7 +313,7 @@ insert a new subscript (e.g a -> a_1)."
                                        ("9"   . laas-insert-script))
                   if (symbolp exp)
                   collect :expansion-desc
-                  and collect (format "_%s, or _{X%s} if a subscript was typed already"
+                  and collect (format "X_%s, or X_{Y%s} if a subscript was typed already"
                                       (substring key -1) (substring key -1))
                   collect key collect exp))
   "Automatic subscripts! Expand In math and after a single letter.")
@@ -346,7 +346,6 @@ insert a new subscript (e.g a -> a_1)."
 
 (apply #'aas-set-snippets 'latex-mode laas-basic-snippets)
 (apply #'aas-set-snippets 'latex-mode laas-subscript-snippets)
-nil
 (apply #'aas-set-snippets 'latex-mode laas-frac-snippet)
 (apply #'aas-set-snippets 'latex-mode laas-accent-snippets)
 

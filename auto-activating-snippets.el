@@ -236,12 +236,16 @@ SNIPPETS should resemble an input to `aas-set-snippets'."
               (expansion (pop snippets)))
           (push
            ;; replace | with unicode so org doesn't think its a table column
-           (list (replace-regexp-in-string
-                  "|" "❘"
-                  (replace-regexp-in-string " " "␣"  key))
-                 (or expansion-desc
-                     ;; just to be clear
-                     expansion))
+           (list
+            (->> key
+                 ;; escaping org mode syntax
+                 (replace-regexp-in-string "|" "❘")
+                 (replace-regexp-in-string "~" "∽")
+                 (replace-regexp-in-string " " "␣"  )
+                 (format "~%s~"))
+            (or expansion-desc
+                ;; just to be clear
+                expansion))
            res))
         ;; expasion-desc is one per snippet
         (setq expansion-desc nil)))

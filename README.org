@@ -1,0 +1,63 @@
+#+TITLE: Auto Activating Snippets
+
+This package implements an engine for auto-expanding snippets. It is done by
+tracking your inputted chars along a tree until you complete a registered key sequence.
+
+Its like running a long prefix command, but the keys you type are not 'consumed'
+and appear in the buffer until you complete the whole command - and then the snippet is triggered!
+
+* Basic configuration
+We didn't implement a complex file type like yasnippet. Declare your snippets
+with ~aas-set-snippets~ straight away, using ~:cond~ to set conditions.
+
+Example configuration using [[https://github.com/jwiegley/use-package][use-package]]:
+#+BEGIN_SRC emacs-lisp
+(use-package auto-activating-snippets
+  :hook (LaTeX-mode . auto-activating-snippets-mode)
+  :hook (org-mode . auto-activating-snippets-mode)
+  :config
+  (aas-set-snippets 'text-mode
+                    ;; expand unconditionally
+                    "o-" "ō"
+                    "i-" "ī"
+                    "a-" "ā"
+                    "u-" "ū"
+                    "e-" "ē")
+  (aas-set-snippets 'latex-mode
+                    ;; set condition!
+                    :cond #'texmathp ; expand only while in math
+                    "supp" "\\supp"
+                    "On" "O(n)"
+                    "O1" "O(1)"
+                    "Olog" "O(\\log n)"
+                    "Olon" "O(n \\log n)"
+                    ;; bind to functions!
+                    "//" (lambda () (interactive)
+                             (yas-expand-snippet "\\frac{$1}{$2}$0"))
+                    "Span" (lambda () (interactive)
+                             (yas-expand-snippet "\\Span($1)$0"))))
+#+END_SRC
+
+(If you want more LaTeX snippets, take a look at [[TODO][LaTeX-auto-activating-snippets]])
+* Comparison to other snippet engines
+** [[https://github.com/SirVer/ultisnips][UltiSnips]]
+UltiSnips does its automatic expansion by matching regexes on the current line.
+We do it by tracking the last characters you typed. This means that if you have
+a snippet expanding ~sin~ to ~\sin~ but you typed ~s~ ~e~ ~←backspace~ ~i~ ~n~,
+the snippet wont expand because the mistyped key broke the sequence. It does
+mean though that having many many snippets shouldn't impact performance (just
+like having big keymaps doesn't).
+** [[https://github.com/joaotavora/yasnippet][Yasnippet]]
+This package was made in response to yasnippet's inability to auto-expand. While
+the two are separate engines, you can totally bind an automatic-snippet to
+expand a snippet defined by yas (by just binding it to a function that calls
+~yas-expand-snippet~).
+** [[https://github.com/cdominik/cdlatex][cdlatex]]
+cdlatex requires you to have 1 or 2 keys sacrificed (usually ~`~ for
+mathematical symbols and ~'~ for accents) in order to trigger its entry
+functions and expand a snippet. This package can 'emulate' cdlatex entirely,
+while not sacrificing any input keys! If you have a snippet with the key ~`a~,
+you can type ~`~ as much as you want and as long as an ~a~ doesn't follow
+nothing unusual would happen. Many of the snippets in
+[[TODO][LaTeX-auto-activating-snippets]] were 'inspired' by cdlatex, replacing ~`~ as a
+prefix by ~;~.
