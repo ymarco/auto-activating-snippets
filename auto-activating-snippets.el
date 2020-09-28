@@ -115,7 +115,7 @@ Gets updated by `aas-post-self-insert-hook'.")
 
 Use for the typing history, `aas--current-prefix-maps' and
 `this-command-keys' for the current typed key.."
-  (setq aas--current-prefix-maps (nconc aas--current-prefix-maps (list aas--prefix-map)))
+  (cl-callf nconc aas--current-prefix-maps (list aas--prefix-map))
   (let ((current-map-sublist aas--current-prefix-maps)
         current-map
         key-result
@@ -127,7 +127,7 @@ Use for the typing history, `aas--current-prefix-maps' and
              ;; remove dead end from the list
              (if prev
                  (setcdr prev (cdr current-map-sublist))
-               (setq aas--current-prefix-maps (cdr aas--current-prefix-maps))))
+               (cl-callf cdr aas--current-prefix-maps)))
             ((keymapp key-result)
              ;; update tree
              (setcar current-map-sublist key-result))
@@ -141,10 +141,10 @@ Use for the typing history, `aas--current-prefix-maps' and
                ;; unseccesfull. remove dead end from the list
                (if prev
                    (setcdr prev (cdr current-map-sublist))
-                 (setq aas--current-prefix-maps (cdr aas--current-prefix-maps))))))
+                 (cl-callf cdr aas--current-prefix-maps)))))
       ;; proceed loop
-      (setq prev current-map-sublist
-            current-map-sublist (cdr-safe current-map-sublist)))))
+      (setq prev current-map-sublist)
+      (cl-callf cdr current-map-sublist))))
 
 (defun aas--debug-print-tree-options ()
   "Print debug info about what entries into the tree are currently kept track of."
