@@ -38,7 +38,7 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
                              (yas-expand-snippet "\\Span($1)$0"))))
 #+END_SRC
 
-(If you want more LaTeX snippets, take a look at [[TODO][LaTeX-auto-activating-snippets]])
+(If you want more LaTeX snippets, take a look at [[https://github.com/tecosaur/LaTeX-auto-activating-snippets][LaTeX-auto-activating-snippets]])
 * Comparison to other snippet engines
 ** [[https://github.com/SirVer/ultisnips][UltiSnips]]
 UltiSnips does its automatic expansion by matching regexes on the current line.
@@ -59,5 +59,5 @@ functions and expand a snippet. This package can 'emulate' cdlatex entirely,
 while not sacrificing any input keys! If you have a snippet with the key ~`a~,
 you can type ~`~ as much as you want and as long as an ~a~ doesn't follow
 nothing unusual would happen. Many of the snippets in
-[[TODO][LaTeX-auto-activating-snippets]] were 'inspired' by cdlatex, replacing ~`~ as a
+[[https://github.com/tecosaur/LaTeX-auto-activating-snippets][LaTeX-auto-activating-snippets]] were 'inspired' by cdlatex, replacing ~`~ as a
 prefix by ~;~.
