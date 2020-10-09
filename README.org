@@ -48,10 +48,12 @@ the snippet wont expand because the mistyped key broke the sequence. It does
 mean though that having many many snippets shouldn't impact performance (just
 like having big keymaps doesn't).
 ** [[https://github.com/joaotavora/yasnippet][Yasnippet]]
-This package was made in response to yasnippet's inability to auto-expand. While
-the two are separate engines, you can totally bind an automatic-snippet to
-expand a snippet defined by yas (by just binding it to a function that calls
-~yas-expand-snippet~).
+Yasnippet [[https://github.com/joaotavora/yasnippet/issues/998#issuecomment-496449546][can]] auto-expand snippets, but that method is expansive with a large
+number of snippets - it calls all the conditions of all the snippets after each
+expansion trial. But no reason to carry on using it for only a few snippets if
+you already have it set up!
+
+(I also learned of that method only after writing this engine.)
 ** [[https://github.com/cdominik/cdlatex][cdlatex]]
 cdlatex requires you to have 1 or 2 keys sacrificed (usually ~`~ for
 mathematical symbols and ~'~ for accents) in order to trigger its entry
