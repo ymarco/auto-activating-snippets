@@ -34,11 +34,15 @@
   "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
 
 (defun aas-expand-snippet-maybe (key expansion &optional condition)
-  "Expand snippet with KEY as EXPANSION.
+  "Try to expand snippet with KEY to EXPANSION.
 
-When CONDITION is a function, call it (from the position in the
+Confirm first that KEY in its entirety is present before `point'.
+If CONDITION is a function, call it (from the position in the
 buffer exactly before the key) and do not expand if it returned
-nil. CONDITION is expected not to modify the buffer.
+nil. Otherwise CONDITION is ignored. If all of these conditions
+are valid, expand the snippet and return t. Otherwise return nil.
+
+CONDITION should not modify the buffer when called.
 
 EXPANTION is called interactively, and CONDITION
 non-interactively."
@@ -63,7 +67,7 @@ non-interactively."
     t))
 
 (defun aas-define-prefix-map-snippet (keymap key expansion &optional condition)
-  "Bind KEY (string) as extended prefix in KEYMAP (keymap) to EXPANTION.
+  "Bind KEY (string) as extended prefix in KEYMAP to EXPANTION.
 
 EXPANTION must either be a string, an interactive function, or nil.
 CONDITION must be nil or a function."
@@ -200,9 +204,7 @@ Otherwise return nil."
     res))
 ;;;###autoload
 (define-minor-mode auto-activating-snippets-mode
-  "Minor mode for dynamically auto-expanding snippets.
-
-See TODO for the availible snippets."
+  "Minor mode for dynamically auto-expanding snippets."
   :init-value nil
 
   (if auto-activating-snippets-mode
