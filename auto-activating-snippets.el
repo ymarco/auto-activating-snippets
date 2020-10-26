@@ -33,6 +33,19 @@
 (defvar-local aas-transient-snippet-condition-result nil
   "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
 
+(defun aas--key-is-fully-typed? ()
+  "Check if `aas-transient-snippet-key' in its entirety is proceeding `point'."
+  (save-excursion
+    (search-forward aas-transient-snippet-key
+                    (+ (point) (length aas-transient-snippet-key))
+                    t)))
+
+(defcustom aas-global-condition-hook (list #'aas--key-is-fully-typed?)
+  "A list of conditions to run before each expansion.  If any
+evaluate to non-nil, do not expand the snippet."
+  :type 'hook
+  :group 'aas)
+
 (defun aas-expand-snippet-maybe (key expansion &optional condition)
   "Try to expand snippet with KEY to EXPANSION.
 
@@ -49,15 +62,16 @@ non-interactively."
   (when-let ((aas-transient-snippet-key key)
              (aas-transient-snippet-expansion expansion)
              (aas-transient-snippet-condition-result
-              (and
-               ;; key was fully typed
-               (save-excursion
-                 (search-backward key (- (point) (length key)) t))
-               ;; condition is either not present, or evaluates to true
-               (or (null condition)
-                   (backward-char (length key))
-                   (prog1 (funcall condition)
-                     (forward-char (length key)))))))
+              (progn
+                (backward-char (length key)) ; call conditions with point *before* key
+                (prog1 (and
+                        ;; global conditions
+                        (run-hook-with-args-until-failure 'aas-global-condition-hook)
+                        ;; snippet-specific condition
+                        (or (null condition)
+                            (funcall condition)))
+                  ;; go back to after the key
+                  (forward-char (length key))))))
     (delete-char (- (length key)))
     (run-hooks 'aas-pre-snippet-expand-hook)
     (if (functionp expansion)
