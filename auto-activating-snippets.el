@@ -1,4 +1,4 @@
-;;; auto-activating-snippets.el --- snippet expansions mid-typing -*- lexical-binding: t; -*-
+;;; auto-activating-snippets.el --- Snippet expansions mid-typing -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2020 Yoav Marco
 ;;
@@ -7,15 +7,20 @@
 ;; Created: April 17, 2020
 ;; Modified: April 17, 2020
 ;; Version: 0.0.1
-;; Keywords:
 ;; Homepage: https://github.com/tecosaur/auto-activating-snippets
-;; Package-Requires: ((emacs 26.1) (cl-lib "0.5"))
+;; Package-Requires: ((emacs "26.1"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; Commentary:
 ;;
-;;  automatic expansion of snippets
+;;  This package implements an engine for auto-expanding snippets.
+;;  It is done by tracking your inputted chars along a tree until you
+;;  complete a registered key sequence.
+;;
+;; Its like running a long prefix command, but the keys you type are not
+;; 'consumed' and appear in the buffer until you complete the whole command
+;; --- and then the snippet is triggered!
 ;;
 ;;; Code:
 
@@ -41,8 +46,8 @@
                     t)))
 
 (defcustom aas-global-condition-hook (list #'aas--key-is-fully-typed?)
-  "A list of conditions to run before each expansion.  If any
-evaluate to non-nil, do not expand the snippet."
+  "A list of conditions to run before each expansion.
+If any evaluate to non-nil, do not expand the snippet."
   :type 'hook
   :group 'aas)
 
@@ -94,7 +99,7 @@ CONDITION must be nil or a function."
       (lambda () (aas-expand-snippet-maybe key expansion condition)))))
 
 (defun aas-set-snippets (name &rest args)
-  "Define snippets for NAME (a symbol entry to aas-keymaps).
+  "Define snippets for NAME (a symbol entry to `aas-keymaps').
 
 NAME should be later used in `aas-activate-keymap' and such.
 
@@ -195,7 +200,7 @@ Otherwise return nil."
                                    aas-active-keymaps)))))
 
 (defun aas-deactivate-keymap (keymap-symbol)
-  "Remove `keymap' from the list of active keymaps."
+  "Remove KEYMAP-SYMBOL from the list of active keymaps."
   (delq keymap-symbol aas-active-keymaps)
   (setq aas--prefix-map (make-composed-keymap
                          (mapcar (lambda (x) (gethash x aas-keymaps))
@@ -209,7 +214,7 @@ Otherwise return nil."
 
 (defun aas--modes-to-activate (mode)
   "Return the list of ancestors for MODE.
-(aas--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
+\(aas--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
   (let ((res nil))
     (while (not (eq mode 'fundamental-mode))
       (push mode res)
