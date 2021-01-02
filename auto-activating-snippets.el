@@ -256,14 +256,15 @@ SNIPPETS should resemble an input to `aas-set-snippets'."
         (let ((key item)
               (expansion (pop snippets)))
           (push
-           ;; replace | with unicode so org doesn't think its a table column
            (list
-            (->> key
-                 ;; escaping org mode syntax
-                 (replace-regexp-in-string "|" "❘")
-                 (replace-regexp-in-string "~" "∽")
-                 (replace-regexp-in-string " " "␣"  )
-                 (format "~%s~"))
+            (format
+             "~%s~"
+             ;; escape org mode syntax in snippet keys
+             (replace-regexp-in-string
+              " " "␣"
+              (replace-regexp-in-string
+               "~" "∽"
+               (replace-regexp-in-string "|" "❘" key))))
             (or expansion-desc
                 ;; just to be clear
                 expansion))
