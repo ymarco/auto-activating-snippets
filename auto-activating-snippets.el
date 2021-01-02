@@ -8,7 +8,7 @@
 ;; Modified: April 17, 2020
 ;; Version: 0.0.1
 ;; Homepage: https://github.com/tecosaur/auto-activating-snippets
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "26.1") (dash "2.17.0"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'dash)
 
 (defvar aas-pre-snippet-expand-hook nil
   "Hooks to run just before expanding snippets.")
