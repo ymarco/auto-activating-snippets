@@ -52,6 +52,13 @@ If any evaluate to non-nil, do not expand the snippet."
   :type 'hook
   :group 'aas)
 
+(defvar aas-keymaps (make-hash-table :test #'eq)
+  "Hash table of all snippet keymaps, in the format of symbol:keymap.")
+
+(defvar-local aas-active-keymaps nil
+  "List of symbols of the active keymaps. Each symbol should be
+present as a key in `aas-keymaps'.")
+
 (defun aas-expand-snippet-maybe (key expansion &optional condition)
   "Try to expand snippet with KEY to EXPANSION.
 
@@ -180,13 +187,6 @@ Use for the typing history, `aas--current-prefix-maps' and
                                                    (cdr kmap))
                                            #'<)))
                    aas--current-prefix-maps)))
-
-(defvar aas-keymaps (make-hash-table :test #'eq)
-  "Hash table of all snippet keymaps, in the format of symbol:keymap.")
-
-(defvar-local aas-active-keymaps nil
-  "List of symbols of the active keymaps. Each symbol should be
-present as a key in `aas-keymaps'.")
 
 ;;;###autoload
 (defun aas-activate-keymap (keymap-symbol)
