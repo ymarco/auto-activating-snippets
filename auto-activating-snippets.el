@@ -2,12 +2,12 @@
 ;;
 ;; Copyright (C) 2020 Yoav Marco
 ;;
-;; Author: Yoav Marco <http://github/yoavm448>
+;; Author: Yoav Marco <https://github/ymarco>
 ;; Maintainer: Yoav Marco <yoavm448@gmail.com>
 ;; Created: April 17, 2020
 ;; Modified: April 17, 2020
 ;; Version: 0.0.1
-;; Homepage: https://github.com/tecosaur/auto-activating-snippets
+;; Homepage: https://github.com/ymarco/auto-activating-snippets
 ;; Package-Requires: ((emacs "26.1"))
 ;;
 ;; This file is not part of GNU Emacs.
