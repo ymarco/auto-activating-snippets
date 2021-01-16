@@ -47,7 +47,7 @@
 
 (defcustom aas-global-condition-hook (list #'aas--key-is-fully-typed?)
   "A list of conditions to run before each expansion.
-If any evaluate to non-nil, do not expand the snippet."
+If any evaluate to nil, do not expand the snippet."
   :type 'hook
   :group 'aas)
 
