@@ -7,6 +7,7 @@
 ;; Created: April 17, 2020
 ;; Modified: April 17, 2020
 ;; Version: 0.0.1
+;; Keywords: abbrev, tools
 ;; Homepage: https://github.com/ymarco/auto-activating-snippets
 ;; Package-Requires: ((emacs "26.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
