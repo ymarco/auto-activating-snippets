@@ -9,6 +9,7 @@
 ;; Version: 0.0.1
 ;; Homepage: https://github.com/ymarco/auto-activating-snippets
 ;; Package-Requires: ((emacs "26.1"))
+;; SPDX-License-Identifier: GPL-3.0-or-later
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -233,7 +234,7 @@ Otherwise return nil."
     (remove-hook 'post-self-insert-hook #'aas-post-self-insert-hook t)))
 
 (defun aas--format-doc-to-org (thing)
-  "Format documentation of THING in org-mode syntax."
+  "Format documentation of THING in `org-mode' syntax."
   (replace-regexp-in-string
    "`\\|'" "~"
    (or (get thing 'variable-documentation)
