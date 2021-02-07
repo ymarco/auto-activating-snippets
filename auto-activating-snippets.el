@@ -212,11 +212,11 @@ Otherwise return nil."
   "Return the list of ancestors for MODE.
 \(aas--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
   (let ((res nil))
-    (while (not (eq mode 'fundamental-mode))
+    (while mode
       (push mode res)
-      (setq mode (or (get mode 'derived-mode-parent)
-                     'fundamental-mode)))
+      (setq mode (get mode 'derived-mode-parent)))
     res))
+
 ;;;###autoload
 (define-minor-mode auto-activating-snippets-mode
   "Minor mode for dynamically auto-expanding snippets."
