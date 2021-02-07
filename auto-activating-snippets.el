@@ -208,12 +208,6 @@ Otherwise return nil."
                          (mapcar (lambda (x) (gethash x aas-keymaps))
                                  aas-active-keymaps))))
 
-;;;###autoload
-(defun aas-activate-major-mode-snippets ()
-  "Activate snippets for current `major-mode'."
-  (aas-activate-keymap major-mode))
-
-
 (defun aas--modes-to-activate (mode)
   "Return the list of ancestors for MODE.
 \(aas--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
