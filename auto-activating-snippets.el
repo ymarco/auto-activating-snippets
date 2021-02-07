@@ -203,7 +203,7 @@ Otherwise return nil."
 
 (defun aas-deactivate-keymap (keymap-symbol)
   "Remove KEYMAP-SYMBOL from the list of active keymaps."
-  (delq keymap-symbol aas-active-keymaps)
+  (cl-callf2 delq keymap-symbol aas-active-keymaps)
   (setq aas--prefix-map (make-composed-keymap
                          (mapcar (lambda (x) (gethash x aas-keymaps))
                                  aas-active-keymaps))))
