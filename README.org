@@ -12,9 +12,9 @@ with ~aas-set-snippets~ straight away, using ~:cond~ to set conditions.
 
 Example configuration using [[https://github.com/jwiegley/use-package][use-package]]:
 #+BEGIN_SRC emacs-lisp
-(use-package auto-activating-snippets
-  :hook (LaTeX-mode . auto-activating-snippets-mode)
-  :hook (org-mode . auto-activating-snippets-mode)
+(use-package aas
+  :hook (LaTeX-mode . aas-mode)
+  :hook (org-mode . aas-mode)
   :config
   (aas-set-snippets 'text-mode
                     ;; expand unconditionally

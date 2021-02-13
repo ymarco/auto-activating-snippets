@@ -1,4 +1,4 @@
-;;; auto-activating-snippets.el --- Snippet expansions mid-typing -*- lexical-binding: t; -*-
+;;; aas.el --- Snippet expansions mid-typing -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2020-2021 Yoav Marco
 ;;
@@ -218,11 +218,11 @@ Otherwise return nil."
     res))
 
 ;;;###autoload
-(define-minor-mode auto-activating-snippets-mode
+(define-minor-mode aas-mode
   "Minor mode for dynamically auto-expanding snippets."
   :init-value nil
 
-  (if auto-activating-snippets-mode
+  (if aas-mode
       (progn
         (mapc #'aas-activate-keymap (aas--modes-to-activate major-mode))
         (add-hook 'post-self-insert-hook #'aas-post-self-insert-hook 0 t))
@@ -269,5 +269,5 @@ SNIPPETS should resemble an input to `aas-set-snippets'."
         (setq expansion-desc nil)))
     (nreverse res)))
 
-(provide 'auto-activating-snippets)
-;;; auto-activating-snippets.el ends here
+(provide 'aas)
+;;; aas.el ends here
