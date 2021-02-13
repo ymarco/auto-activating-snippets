@@ -1,12 +1,12 @@
 ;;; auto-activating-snippets.el --- Snippet expansions mid-typing -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2020 Yoav Marco
+;; Copyright (C) 2020-2021 Yoav Marco
 ;;
-;; Author: Yoav Marco <https://github/ymarco>
+;; Author: Yoav Marco <yoavm448@gmail.com>
 ;; Maintainer: Yoav Marco <yoavm448@gmail.com>
 ;; Created: April 17, 2020
-;; Modified: April 17, 2020
-;; Version: 0.0.1
+;; Modified: February 13, 2021
+;; Version: 0.1
 ;; Keywords: abbrev, tools
 ;; Homepage: https://github.com/ymarco/auto-activating-snippets
 ;; Package-Requires: ((emacs "26.1"))
@@ -16,9 +16,9 @@
 ;;
 ;;; Commentary:
 ;;
-;;  This package implements an engine for auto-expanding snippets.
-;;  It is done by tracking your inputted chars along a tree until you
-;;  complete a registered key sequence.
+;; This package implements an engine for auto-expanding snippets.
+;; It is done by tracking your inputted chars along a tree until you
+;; complete a registered key sequence.
 ;;
 ;; Its like running a long prefix command, but the keys you type are not
 ;; 'consumed' and appear in the buffer until you complete the whole command
