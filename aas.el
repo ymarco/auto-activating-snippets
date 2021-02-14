@@ -34,11 +34,20 @@
   "Hooks to run just after expanding snippets.")
 
 (defvar-local aas-transient-snippet-key nil
-  "KEY of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
+  "Key of the active snippet.
+Defined while calling the expansion and condition functions, and
+during evaluation of `aas-pre-snippet-expand-hook' and
+`aas-post-snippet-expand-hook'.")
 (defvar-local aas-transient-snippet-expansion nil
-  "EXPANSION of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
+  "Expansion of the active snippet.
+Defined while calling the expansion and condition functions, and
+during evaluation of `aas-pre-snippet-expand-hook' and
+`aas-post-snippet-expand-hook'.")
 (defvar-local aas-transient-snippet-condition-result nil
-  "Result of CONDITION of the active snippet, defined while calling the expansion and condition functions, as well as `aas-pre-snippet-expand-hook' and `aas-post-snippet-expand-hook'.")
+  "Result of the condition that was run for the active snippet.
+Defined while calling the expansion function, and during
+evaluation of `aas-pre-snippet-expand-hook' and
+`aas-post-snippet-expand-hook'.")
 
 (defun aas--key-is-fully-typed? ()
   "Check if `aas-transient-snippet-key' in its entirety is proceeding `point'."
