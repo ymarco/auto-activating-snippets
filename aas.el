@@ -28,10 +28,17 @@
 
 (require 'cl-lib)
 
-(defvar aas-pre-snippet-expand-hook nil
-  "Hooks to run just before expanding snippets.")
-(defvar aas-post-snippet-expand-hook nil
-  "Hooks to run just after expanding snippets.")
+(defgroup aas nil
+  "Snippet expansions mid-typing.")
+
+(defcustom aas-pre-snippet-expand-hook nil
+  "Hooks to run just before expanding snippets."
+  :type 'hook
+  :group 'aas)
+(defcustom aas-post-snippet-expand-hook nil
+  "Hooks to run just after expanding snippets."
+  :type 'hook
+  :group 'aas)
 
 (defvar-local aas-transient-snippet-key nil
   "Key of the active snippet.
@@ -56,11 +63,12 @@ evaluation of `aas-pre-snippet-expand-hook' and
                     (+ (point) (length aas-transient-snippet-key))
                     t)))
 
-(defcustom aas-global-condition-hook (list #'aas--key-is-fully-typed?)
+(defcustom aas-global-condition-hook nil
   "A list of conditions to run before each expansion.
 If any evaluate to nil, do not expand the snippet."
   :type 'hook
   :group 'aas)
+(add-hook 'aas-global-condition-hook #'aas--key-is-fully-typed?)
 
 (defvar aas-keymaps (make-hash-table :test #'eq)
   "Hash table of all snippet keymaps, in the format of symbol:keymap.")
@@ -82,19 +90,19 @@ CONDITION should not modify the buffer when called.
 
 EXPANTION is called interactively, and CONDITION
 non-interactively."
-  (when-let ((aas-transient-snippet-key key)
-             (aas-transient-snippet-expansion expansion)
-             (aas-transient-snippet-condition-result
-              (progn
-                (backward-char (length key)) ; call conditions with point *before* key
-                (prog1 (and
-                        ;; global conditions
-                        (run-hook-with-args-until-failure 'aas-global-condition-hook)
-                        ;; snippet-specific condition
-                        (or (null condition)
-                            (funcall condition)))
-                  ;; go back to after the key
-                  (forward-char (length key))))))
+  (when-let* ((aas-transient-snippet-key key)
+              (aas-transient-snippet-expansion expansion)
+              (aas-transient-snippet-condition-result
+               (progn
+                 (backward-char (length key)) ; call conditions with point *before* key
+                 (prog1 (and
+                         ;; global conditions
+                         (run-hook-with-args-until-failure 'aas-global-condition-hook)
+                         ;; snippet-specific condition
+                         (or (null condition)
+                             (funcall condition)))
+                   ;; go back to after the key
+                   (forward-char (length key))))))
     (delete-char (- (length key)))
     (run-hooks 'aas-pre-snippet-expand-hook)
     (if (functionp expansion)
@@ -111,7 +119,7 @@ CONDITION must be nil or a function."
   (unless (or (stringp expansion) (functionp expansion) (null expansion))
     (error "Expansion must be either a string, function, or nil"))
   (unless (or (null condition) (functionp condition))
-    (error "Condition must be either a string or function"))
+    (error "Condition must be either nil or a function"))
   (define-key keymap key
     (when expansion
       (lambda () (aas-expand-snippet-maybe key expansion condition)))))
