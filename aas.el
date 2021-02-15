@@ -236,14 +236,19 @@ Otherwise return nil."
 
 ;;;###autoload
 (define-minor-mode aas-mode
-  "Minor mode for dynamically auto-expanding snippets."
-  :init-value nil
+  "Minor mode for dynamically auto-expanding snippets.
 
+This does not set any default keymaps. For that use
+`ass-activate-for-major-mode' and `aas-activate-keymap'."
+  :init-value nil
   (if aas-mode
-      (progn
-        (mapc #'aas-activate-keymap (aas--modes-to-activate major-mode))
-        (add-hook 'post-self-insert-hook #'aas-post-self-insert-hook 0 t))
+      (add-hook 'post-self-insert-hook #'aas-post-self-insert-hook 0 t)
     (remove-hook 'post-self-insert-hook #'aas-post-self-insert-hook t)))
+
+;;;###autoload
+(defun ass-activate-for-major-mode ()
+  (aas-mode +1)
+  (mapc #'aas-activate-keymap (aas--modes-to-activate major-mode)))
 
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."
