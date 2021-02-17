@@ -90,19 +90,19 @@ CONDITION should not modify the buffer when called.
 
 EXPANTION is called interactively, and CONDITION
 non-interactively."
-  (when-let* ((aas-transient-snippet-key key)
-              (aas-transient-snippet-expansion expansion)
-              (aas-transient-snippet-condition-result
-               (progn
-                 (backward-char (length key)) ; call conditions with point *before* key
-                 (prog1 (and
-                         ;; global conditions
-                         (run-hook-with-args-until-failure 'aas-global-condition-hook)
-                         ;; snippet-specific condition
-                         (or (null condition)
-                             (funcall condition)))
-                   ;; go back to after the key
-                   (forward-char (length key))))))
+  (when-let ((aas-transient-snippet-key key)
+             (aas-transient-snippet-expansion expansion)
+             (aas-transient-snippet-condition-result
+              (progn
+                (backward-char (length key)) ; call conditions with point *before* key
+                (prog1 (and
+                        ;; global conditions
+                        (run-hook-with-args-until-failure 'aas-global-condition-hook)
+                        ;; snippet-specific condition
+                        (or (null condition)
+                            (funcall condition)))
+                  ;; go back to after the key
+                  (forward-char (length key))))))
     (delete-char (- (length key)))
     (run-hooks 'aas-pre-snippet-expand-hook)
     (if (functionp expansion)
