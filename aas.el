@@ -29,7 +29,8 @@
 (require 'cl-lib)
 
 (defgroup aas nil
-  "Snippet expansions mid-typing.")
+  "Snippet expansions mid-typing."
+  :prefix "aas-")
 
 (defcustom aas-pre-snippet-expand-hook nil
   "Hooks to run just before expanding snippets."
