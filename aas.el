@@ -229,11 +229,14 @@ Otherwise return nil."
 (defun aas--modes-to-activate (mode)
   "Return the list of ancestors for MODE.
 \(aas--modes-to-activate 'org-mode)  => (text-mode outline-mode org-mode)"
-  (let ((res nil))
-    (while mode
-      (push mode res)
-      (setq mode (get mode 'derived-mode-parent)))
-    res))
+  (cl-loop for parent = mode
+           then (or (get parent 'derived-mode-parent)
+                    ;; if parent is an alias, continue with the aliased
+                    (let ((aliased? (symbol-function parent)))
+                      (and (symbolp aliased?) aliased?)))
+           while parent
+           collect parent into modes
+           finally return (nreverse modes)))
 
 ;;;###autoload
 (define-minor-mode aas-mode
