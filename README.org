@@ -6,7 +6,7 @@ tracking your inputted chars along a tree until you complete a registered key se
 Its like running a long prefix command, but the keys you type are not 'consumed'
 and appear in the buffer until you complete the whole command - and then the snippet is triggered!
 
-* Basic configuration
+* Usage & Basic Configuration
 We didn't implement a complex file type like yasnippet. Declare your snippets
 with ~aas-set-snippets~ straight away, using ~:cond~ to set conditions.
 
@@ -35,7 +35,10 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
                     "//" (lambda () (interactive)
                              (yas-expand-snippet "\\frac{$1}{$2}$0"))
                     "Span" (lambda () (interactive)
-                             (yas-expand-snippet "\\Span($1)$0"))))
+                             (yas-expand-snippet "\\Span($1)$0")))
+  ;; disable snippets by redefining them with a nil expansion
+  (aas-set-snippets 'latex-mode
+                    "supp" nil))
 #+END_SRC
 
 (If you want more LaTeX snippets, take a look at [[https://github.com/tecosaur/LaTeX-auto-activating-snippets][LaTeX-auto-activating-snippets]])
