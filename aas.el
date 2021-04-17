@@ -5,11 +5,11 @@
 ;; Author: Yoav Marco <yoavm448@gmail.com>
 ;; Maintainer: Yoav Marco <yoavm448@gmail.com>
 ;; Created: April 17, 2020
-;; Modified: February 13, 2021
-;; Version: 0.2
+;; Modified: April 17, 2021
+;; Version: 1.0
 ;; Keywords: abbrev, tools
 ;; Homepage: https://github.com/ymarco/auto-activating-snippets
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "26.3"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;;
 ;; This file is not part of GNU Emacs.
