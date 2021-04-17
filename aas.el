@@ -196,17 +196,6 @@ Use for the typing history, `aas--current-prefix-maps' and
       (setq prev current-map-sublist)
       (cl-callf cdr current-map-sublist))))
 
-(defun aas--debug-print-tree-options ()
-  "Print debug info about what entries into the tree are currently kept track of."
-  (message "%s entries: %s"
-           (length aas--current-prefix-maps)
-           (mapcar (lambda (kmap)
-                     (apply #'string (sort (mapcar (lambda (key-and-binding)
-                                                     (car key-and-binding))
-                                                   (cdr kmap))
-                                           #'<)))
-                   aas--current-prefix-maps)))
-
 ;;;###autoload
 (defun aas-activate-keymap (keymap-symbol)
   "Add KEYMAP-SYMBOL to the list of active snippet keymaps.

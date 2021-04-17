@@ -1,4 +1,8 @@
-#+TITLE: Auto Activating Snippets
+#+title: Auto Activating Snippets
+#+author: ymarco
+
+#+html: <a href="https://www.gnu.org/software/emacs/emacs.html#Releases"><img src="https://img.shields.io/badge/Emacs-26.3+-blueviolet.svg?style=flat-square&logo=GNU%20Emacs&logoColor=white"></a>
+#+html: <a href="https://melpa.org/#/laas"><img src="https://melpa.org/packages/aas-badge.svg"></a>
 
 This package implements an engine for auto-expanding snippets. It is done by
 tracking your inputted chars along a tree until you complete a registered key sequence.
@@ -11,7 +15,7 @@ We didn't implement a complex file type like yasnippet. Declare your snippets
 with ~aas-set-snippets~ straight away, using ~:cond~ to set conditions.
 
 Example configuration using [[https://github.com/jwiegley/use-package][use-package]]:
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package aas
   :hook (LaTeX-mode . ass-activate-for-major-mode)
   :hook (org-mode . ass-activate-for-major-mode)
@@ -39,7 +43,7 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
   ;; disable snippets by redefining them with a nil expansion
   (aas-set-snippets 'latex-mode
                     "supp" nil))
-#+END_SRC
+#+end_src
 
 (If you want more LaTeX snippets, take a look at [[https://github.com/tecosaur/LaTeX-auto-activating-snippets][LaTeX-auto-activating-snippets]])
 * Comparison to other snippet engines
