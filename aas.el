@@ -232,16 +232,22 @@ Otherwise return nil."
   "Minor mode for dynamically auto-expanding snippets.
 
 This does not set any default keymaps. For that use
-`ass-activate-for-major-mode' and `aas-activate-keymap'."
+`aas-activate-for-major-mode' and `aas-activate-keymap'."
   :init-value nil
   (if aas-mode
       (add-hook 'post-self-insert-hook #'aas-post-self-insert-hook 0 t)
     (remove-hook 'post-self-insert-hook #'aas-post-self-insert-hook t)))
 
 ;;;###autoload
-(defun ass-activate-for-major-mode ()
+(defun aas-activate-for-major-mode ()
   (aas-mode +1)
   (mapc #'aas-activate-keymap (aas--modes-to-activate major-mode)))
+;; The function had a typo aas->ass that was only found recently.
+;; Try not to break people's configurations with the typo fixed
+(define-obsolete-function-alias
+  'ass-activate-for-major-mode #'aas-activate-for-major-mode
+  "1.1" "This was a horrible typo of `aas-activate-for-major-mode', but it
+appeared in the readme for months.")
 
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."

@@ -17,8 +17,8 @@ with ~aas-set-snippets~ straight away, using ~:cond~ to set conditions.
 Example configuration using [[https://github.com/jwiegley/use-package][use-package]]:
 #+begin_src emacs-lisp
 (use-package aas
-  :hook (LaTeX-mode . ass-activate-for-major-mode)
-  :hook (org-mode . ass-activate-for-major-mode)
+  :hook (LaTeX-mode . aas-activate-for-major-mode)
+  :hook (org-mode . aas-activate-for-major-mode)
   :config
   (aas-set-snippets 'text-mode
                     ;; expand unconditionally
