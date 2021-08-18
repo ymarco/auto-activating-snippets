@@ -155,8 +155,11 @@ For examples see the definition of `aas--prefix-map'.
 (defvar-local aas--prefix-map nil
   "Defalut full snippet keymap.")
 
-(defvar-local aas--current-prefix-maps nil
+(defvar-local aas--current-prefix-maps (list nil)
   "Global variable to keep track of the current user path trace of snippets.
+
+A list of active keymap trees that may result in expansion, with
+the first element always nil for update logic simplicity.
 
 Gets updated by `aas-post-self-insert-hook'.")
 
@@ -165,36 +168,33 @@ Gets updated by `aas-post-self-insert-hook'.")
 
 Use for the typing history, `aas--current-prefix-maps' and
 `this-command-keys' for the current typed key.."
-  (cl-callf nconc aas--current-prefix-maps (list aas--prefix-map))
-  (let ((current-map-sublist aas--current-prefix-maps)
+  (cl-callf nconc (cdr aas--current-prefix-maps) (list aas--prefix-map))
+  (let ((current-map-sublist (cdr aas--current-prefix-maps))
+        (prev aas--current-prefix-maps)
         current-map
-        key-result
-        prev)
+        key-result)
     (while current-map-sublist
       (setq current-map (car current-map-sublist)
             key-result (lookup-key current-map (this-command-keys)))
       (cond ((null key-result)
              ;; remove dead end from the list
-             (if prev
-                 (setcdr prev (cdr current-map-sublist))
-               (cl-callf cdr aas--current-prefix-maps)))
+             (cl-callf cdr current-map-sublist)
+             (setcdr prev current-map-sublist))
             ((keymapp key-result)
              ;; update tree
-             (setcar current-map-sublist key-result))
+             (setcar current-map-sublist key-result)
+             (setq prev current-map-sublist)
+             (cl-callf cdr current-map-sublist))
             ((functionp key-result)
              ;; an ending! no need to call interactively,`aas-expand-snippet-maybe'
              ;; takes care of that
              (if (funcall key-result)
                  ;; condition evaluated to true, and snipped expanded!
                  (setq current-map-sublist nil      ; stop the loop
-                       aas--current-prefix-maps nil) ; abort all other snippest
+                       aas--current-prefix-maps (list nil)) ; abort all other snippest
                ;; unseccesfull. remove dead end from the list
-               (if prev
-                   (setcdr prev (cdr current-map-sublist))
-                 (cl-callf cdr aas--current-prefix-maps)))))
-      ;; proceed loop
-      (setq prev current-map-sublist)
-      (cl-callf cdr current-map-sublist))))
+               (cl-callf cdr current-map-sublist)
+               (setcdr prev current-map-sublist)))))))
 
 ;;;###autoload
 (defun aas-activate-keymap (keymap-symbol)
