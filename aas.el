@@ -224,20 +224,21 @@ Gets updated by `aas-post-self-insert-hook'.")
 
 Use for the typing history, `aas--current-prefix-maps' and
 `this-command-keys' for the current typed key.."
-  (cl-callf nconc (cdr aas--current-prefix-maps) (list aas--prefix-map))
-  (let ((current-map-sublist (cdr aas--current-prefix-maps)))
-    (while current-map-sublist
-      (let* ((current-map (car current-map-sublist))
-             (key-result (lookup-key current-map (this-command-keys))))
+  (cl-callf nconc aas--current-prefix-maps (list aas--prefix-map))
+  (let ((next-maps nil))
+    (while aas--current-prefix-maps
+      (let* ((candidate (car aas--current-prefix-maps))
+             (key-result (lookup-key candidate (this-command-keys))))
         (cond ((keymapp key-result)
-               ;; update tree
-               (setcar current-map-sublist key-result))
+               ;; Collect the keymap for the next call
+               (cl-callf2 cons key-result next-maps))
               ((and (functionp key-result) (funcall key-result))
                ;; an ending! no need to call interactively,`aas-expand-snippet-maybe'
                ;; takes care of that
-               (setq current-map-sublist nil      ; stop the loop
-                     aas--current-prefix-maps (list nil)))); abort all other snippets
-        (cl-callf cdr current-map-sublist)))))
+               (setq aas--current-prefix-maps nil  ; stop the loop
+                     next-maps nil))) ; abort the collected snippets
+        (cl-callf cdr aas--current-prefix-maps)))
+    (setq aas--current-prefix-maps next-maps)))
 
 ;;;###autoload
 (defun aas-activate-keymap (keymap-symbol)
