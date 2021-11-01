@@ -2,7 +2,7 @@
 #+author: ymarco
 
 #+html: <a href="https://www.gnu.org/software/emacs/emacs.html#Releases"><img src="https://img.shields.io/badge/Emacs-26.3+-blueviolet.svg?style=flat-square&logo=GNU%20Emacs&logoColor=white"></a>
-#+html: <a href="https://melpa.org/#/laas"><img src="https://melpa.org/packages/aas-badge.svg"></a>
+#+html: <a href="https://melpa.org/#/aas"><img src="https://melpa.org/packages/aas-badge.svg"></a>
 
 This package implements an engine for auto-expanding snippets. It is done by
 tracking your inputted chars along a tree until you complete a registered key sequence.
