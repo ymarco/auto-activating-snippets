@@ -21,28 +21,28 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
   :hook (org-mode . aas-activate-for-major-mode)
   :config
   (aas-set-snippets 'text-mode
-                    ;; expand unconditionally
-                    "o-" "ō"
-                    "i-" "ī"
-                    "a-" "ā"
-                    "u-" "ū"
-                    "e-" "ē")
+    ;; expand unconditionally
+    "o-" "ō"
+    "i-" "ī"
+    "a-" "ā"
+    "u-" "ū"
+    "e-" "ē")
   (aas-set-snippets 'latex-mode
-                    ;; set condition!
-                    :cond #'texmathp ; expand only while in math
-                    "supp" "\\supp"
-                    "On" "O(n)"
-                    "O1" "O(1)"
-                    "Olog" "O(\\log n)"
-                    "Olon" "O(n \\log n)"
-                    ;; bind to functions!
-                    "//" (lambda () (interactive)
-                             (yas-expand-snippet "\\frac{$1}{$2}$0"))
-                    "Span" (lambda () (interactive)
-                             (yas-expand-snippet "\\Span($1)$0")))
+    ;; set condition!
+    :cond #'texmathp ; expand only while in math
+    "supp" "\\supp"
+    "On" "O(n)"
+    "O1" "O(1)"
+    "Olog" "O(\\log n)"
+    "Olon" "O(n \\log n)"
+    ;; bind to functions!
+    "//" (lambda () (interactive)
+           (yas-expand-snippet "\\frac{$1}{$2}$0"))
+    "Span" (lambda () (interactive)
+             (yas-expand-snippet "\\Span($1)$0")))
   ;; disable snippets by redefining them with a nil expansion
   (aas-set-snippets 'latex-mode
-                    "supp" nil))
+    "supp" nil))
 #+end_src
 
 (If you want more LaTeX snippets, take a look at [[https://github.com/tecosaur/LaTeX-auto-activating-snippets][LaTeX-auto-activating-snippets]])

@@ -136,6 +136,7 @@ The following keywords in ARGS are avaliable:
 For examples see the definition of `aas--prefix-map'.
 
 \(fn KEYMAP [:cond :expansion-desc] KEY-EXPANSIONS)"
+  (declare (indent 1))
   (let ((keymap (or (gethash name aas-keymaps) (make-sparse-keymap)))
         item cond)
     (while args
