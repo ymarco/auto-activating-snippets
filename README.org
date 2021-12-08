@@ -22,11 +22,11 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
   :config
   (aas-set-snippets 'text-mode
     ;; expand unconditionally
-    "o-" "ō"
-    "i-" "ī"
-    "a-" "ā"
-    "u-" "ū"
-    "e-" "ē")
+    ";o-" "ō"
+    ";i-" "ī"
+    ";a-" "ā"
+    ";u-" "ū"
+    ";e-" "ē")
   (aas-set-snippets 'latex-mode
     ;; set condition!
     :cond #'texmathp ; expand only while in math
