@@ -239,10 +239,21 @@ Otherwise return nil."
 This does not set any default keymaps. For that use
 `aas-activate-for-major-mode' and `aas-activate-keymap'."
   :init-value nil
+  :group 'aas
   (if aas-mode
       (add-hook 'post-self-insert-hook #'aas-post-self-insert-hook 0 t)
     (remove-hook 'post-self-insert-hook #'aas-post-self-insert-hook t)))
 
+;;;###autoload
+(define-global-minor-mode aas-global-mode aas-mode
+  (lambda ()
+    (aas-mode +1)
+    (aas-activate-keymap 'global)))
+;; define-global-minor-mode doesn't let us write documentation
+(put
+ 'aas-global-mode 'function-documentation
+ "Global `aas-mode'. The activated keymap is `global': set global snippets with
+\(aas-set-snippets 'global ...)")
 ;;;###autoload
 (defun aas-activate-for-major-mode ()
   (aas-mode +1)

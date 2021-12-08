@@ -44,6 +44,13 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
   (aas-set-snippets 'latex-mode
     "supp" nil))
 #+end_src
+There's also ~aas-global-mode~ which activates snippets from the keymap ~global~, e.g
+#+begin_src emacs-lisp
+(aas-set-snippets 'global
+  ";--" "—"
+  ";->" "→")
+(aas-global-mode)
+#+end_src
 
 (If you want more LaTeX snippets, take a look at [[https://github.com/tecosaur/LaTeX-auto-activating-snippets][LaTeX-auto-activating-snippets]])
 * Comparison to other snippet engines
