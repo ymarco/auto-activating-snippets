@@ -106,9 +106,9 @@ non-interactively."
                   (forward-char (length key))))))
     (delete-char (- (length key)))
     (run-hooks 'aas-pre-snippet-expand-hook)
-    (if (functionp expansion)
-        (call-interactively expansion)
-      (insert expansion))
+    (if (functionp aas-transient-snippet-expansion)
+        (call-interactively aas-transient-snippet-expansion)
+      (insert aas-transient-snippet-expansion))
     (run-hooks 'aas-post-snippet-expand-hook)
     t))
 
@@ -254,6 +254,7 @@ This does not set any default keymaps. For that use
  'aas-global-mode 'function-documentation
  "Global `aas-mode'. The activated keymap is `global': set global snippets with
 \(aas-set-snippets 'global ...)")
+
 ;;;###autoload
 (defun aas-activate-for-major-mode ()
   (aas-mode +1)
