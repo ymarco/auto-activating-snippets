@@ -266,12 +266,6 @@ This does not set any default keymaps. For that use
   "1.1" "This was a horrible typo of `aas-activate-for-major-mode', but it
 appeared in the readme for months.")
 
-(defun aas-embark-menu ()
-  (interactive)
-  (when-let (command (embark-completing-read-prompter
-                      aas--prefix-map nil 'no-default))
-    (call-interactively command)))
-
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."
   (replace-regexp-in-string
