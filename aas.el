@@ -5,8 +5,8 @@
 ;; Author: Yoav Marco <yoavm448@gmail.com>
 ;; Maintainer: Yoav Marco <yoavm448@gmail.com>
 ;; Created: April 17, 2020
-;; Modified: April 17, 2021
-;; Version: 1.0
+;; Modified: February 20, 2022
+;; Version: 1.1
 ;; Keywords: abbrev, tools
 ;; Homepage: https://github.com/ymarco/auto-activating-snippets
 ;; Package-Requires: ((emacs "26.3"))
@@ -265,6 +265,12 @@ This does not set any default keymaps. For that use
   'ass-activate-for-major-mode #'aas-activate-for-major-mode
   "1.1" "This was a horrible typo of `aas-activate-for-major-mode', but it
 appeared in the readme for months.")
+
+(defun aas-embark-menu ()
+  (interactive)
+  (when-let (command (embark-completing-read-prompter
+                      aas--prefix-map nil 'no-default))
+    (call-interactively command)))
 
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."
