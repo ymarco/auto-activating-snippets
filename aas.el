@@ -251,8 +251,8 @@ Use for the typing history, `aas--current-prefix-maps' and
                ;; unseccesfull. remove dead end from the list
                (cl-callf cdr current-map-sublist)
                (setcdr prev current-map-sublist)))
-            ;; Make sure the loop progresses even in the face of odd output from
-            ;; `this-command-keys'
+            ;; Make sure the loop progress even in the face of objectionable output from
+            ;; (this-command-keys)
             (t (cl-callf cdr current-map-sublist)
                (setcdr prev current-map-sublist))))))
 
