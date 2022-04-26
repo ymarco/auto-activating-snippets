@@ -126,14 +126,38 @@ CONDITION must be nil or a function."
       (lambda () (aas-expand-snippet-maybe key expansion condition)))))
 
 (defun aas-set-snippets (name &rest args)
-  "Define snippets for NAME (a symbol entry to `aas-keymaps').
+  "Define snippets for the keymap named NAME (usually a major or minor-mode name).
 
-NAME should be later used in `aas-activate-keymap' and such.
+Later, the keymap can be activated by calling `aas-activate-keymap' with NAME.
 
-The following keywords in ARGS are avaliable:
-  :cond CONDITION         set the condition for the the following snippets
+Example call:
+\(aas-set-snippets 'org-mode
+   :cond #'bolp
+   \"#+lh\" \"#+latex_header: \"
+   \"#+hh\" \"#+html_header: \"
+   \"#+title\" (lambda () (interactive)
+               (insert \"#+title: \" user-full-name)))
 
-For examples see the definition of `aas--prefix-map'.
+Specification:
+
+KEY-EXPANSIONS is a plist of snippet keys and their expansions.
+keys must be strings, and expansions must be of these types:
+- String, meaning the key would be replaced by the expansion
+  string.
+- Function, meaning the key would be removed and the function
+  would be called interactively to modify the buffer.
+- nil, meaning expansion for the key is disabled.
+
+Additionally, a sequence of :cond FN can be inserted between
+key-expansion pairs. This would make all the snippets writen
+after the :cond first call FN (non-interactively), and only
+expand if it returned non-nil. To remove a previously-set
+condition, use :cond nil.
+
+During the expansion process, user-provided functions for
+conditions and examples are free to use the variables
+`aas-transient-snippet-key', `aas-transient-snippet-expansion',
+`aas-transient-snippet-condition-result', which see.
 
 \(fn KEYMAP [:cond :expansion-desc] KEY-EXPANSIONS)"
   (declare (indent 1))
@@ -205,8 +229,7 @@ Use for the typing history, `aas--current-prefix-maps' and
 (defun aas-activate-keymap (keymap-symbol)
   "Add KEYMAP-SYMBOL to the list of active snippet keymaps.
 
-Return non-nil if that keymap actually exists and was added.
-Otherwise return nil."
+Return non-nil if that keymap actually exists and was added."
   (when (gethash keymap-symbol aas-keymaps)
     (add-to-list 'aas-active-keymaps keymap-symbol)
     (setq aas--prefix-map (make-composed-keymap
@@ -257,6 +280,7 @@ This does not set any default keymaps. For that use
 
 ;;;###autoload
 (defun aas-activate-for-major-mode ()
+  "Activate the aas keymap for `major-mode' and all its ancestor modes."
   (aas-mode +1)
   (mapc #'aas-activate-keymap (aas--modes-to-activate major-mode)))
 ;; The function had a typo aas->ass that was only found recently.
@@ -265,6 +289,12 @@ This does not set any default keymaps. For that use
   'ass-activate-for-major-mode #'aas-activate-for-major-mode
   "1.1" "This was a horrible typo of `aas-activate-for-major-mode', but it
 appeared in the readme for months.")
+
+(defun aas-embark-menu ()
+  (interactive)
+  (when-let (command (embark-completing-read-prompter
+                      aas--prefix-map nil 'no-default))
+    (call-interactively command)))
 
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."
