@@ -41,18 +41,43 @@
   :type 'hook
   :group 'aas)
 
+(cl-defstruct aas-snippet
+  "An expandable snippet. Use `aas-expand-snippet-maybe' to expand."
+  (key nil :documentation "A string. Needs to be present before point for the snippet to be expanded.")
+  (expansion nil :documentation "A string or function. If function, it will be called
+interactively to expand the snippet.")
+  (condition nil :documentation "Either nil or a function. If function, it will be called the
+snippet will not be expanded if returned nil.")
+  (keymap-symbol nil :documentation "A symbol marking from where the snippet was defined, e.g
+`org-mode'.")
+  (props nil :documentation "A plist of optional misc properties."))
+
+(defvar-local aas-transient-snippet nil
+  "The current active snippet, an `aas-snippet' object.
+
+Defined while calling the expansion and condition functions, and
+during evaluation of `aas-pre-snippet-expand-hook' and
+`aas-post-snippet-expand-hook'.")
+
 (defvar-local aas-transient-snippet-key nil
   "Key of the active snippet.
 
 Defined while calling the expansion and condition functions, and
 during evaluation of `aas-pre-snippet-expand-hook' and
 `aas-post-snippet-expand-hook'.")
+(make-obsolete-variable 'aas-transient-snippet-key
+ 'aas-transient-snippet "2.0")
+
 (defvar-local aas-transient-snippet-expansion nil
   "Expansion of the active snippet.
 
 Defined while calling the expansion and condition functions, and
 during evaluation of `aas-pre-snippet-expand-hook' and
-`aas-post-snippet-expand-hook'.")
+`aas-post-snippet-expand-hook'.
+
+User functions that are run during snippet expansion can set this
+variable to modify what the snippet will expand to.")
+
 (defvar-local aas-transient-snippet-condition-result nil
   "Result of the condition that was run for the active snippet.
 Defined while calling the expansion function, and during
@@ -80,21 +105,22 @@ If any evaluate to nil, do not expand the snippet."
   "List of symbols of the active keymaps. Each symbol should be
 present as a key in `aas-keymaps'.")
 
-(defun aas-expand-snippet-maybe (key expansion &optional condition)
-  "Try to expand snippet with KEY to EXPANSION.
+(defun aas-expand-snippet-maybe (snippet)
+  "Try to expand SNIPPET, an `aas-snippet' object.
 
 Confirm first that KEY in its entirety is present before `point'.
-If CONDITION is a function, call it (from the position in the
+Call the snippet condition if non-nil (from the position in the
 buffer exactly before the key) and do not expand if it returned
-nil. Otherwise CONDITION is ignored. If all of these conditions
-are valid, expand the snippet and return t. Otherwise return nil.
+nil. If all of these conditions are valid, expand the snippet and
+return t. Otherwise return nil.
 
-CONDITION should not modify the buffer when called.
+The snippet condition should not modify the buffer when called.
 
-EXPANTION is called interactively, and CONDITION
-non-interactively."
-  (when-let ((aas-transient-snippet-key key)
-             (aas-transient-snippet-expansion expansion)
+If functions, the `aas-snippet-expantion' slot is called
+interactively, and `aas-snippet-condition' non-interactively."
+  (when-let ((key (aas-snippet-key snippet))
+             (aas-transient-snippet-key key)
+             (aas-transient-snippet-expansion (aas-snippet-expansion snippet))
              (aas-transient-snippet-condition-result
               (progn
                 (backward-char (length key)) ; call conditions with point *before* key
@@ -102,8 +128,8 @@ non-interactively."
                         ;; global conditions
                         (run-hook-with-args-until-failure 'aas-global-condition-hook)
                         ;; snippet-specific condition
-                        (or (null condition)
-                            (funcall condition)))
+                        (or (null (aas-snippet-condition snippet))
+                            (funcall (aas-snippet-condition snippet))))
                   ;; go back to after the key
                   (forward-char (length key))))))
     (delete-char (- (length key)))
@@ -114,18 +140,24 @@ non-interactively."
     (run-hooks 'aas-post-snippet-expand-hook)
     t))
 
-(defun aas-define-prefix-map-snippet (keymap key expansion &optional condition)
-  "Bind KEY (string) as extended prefix in KEYMAP to EXPANTION.
 
-EXPANTION must either be a string, an interactive function, or nil.
-CONDITION must be nil or a function."
-  (unless (or (stringp expansion) (functionp expansion) (null expansion))
+
+(defun aas--bind-snippet (snippet)
+  "Bind SNIPPET (an `aas-snippet' object) to the aas keymap it
+specifies in its `keymap-symbol' slot."
+  (unless (cl-typep (aas-snippet-expansion snippet) '(or string function null))
     (error "Expansion must be either a string, function, or nil"))
-  (unless (or (null condition) (functionp condition))
-    (error "Condition must be either nil or a function"))
-  (define-key keymap key
-    (when expansion
-      (lambda () (aas-expand-snippet-maybe key expansion condition)))))
+  (unless (cl-typep (aas-snippet-condition snippet) '(or function null))
+    (error "Expansion must be either a function or nil"))
+  (let* ((keymap-symbol (aas-snippet-keymap-symbol snippet))
+         (keymap (or (gethash keymap-symbol aas-keymaps)
+                     (make-sparse-keymap))))
+    (define-key keymap (aas-snippet-key snippet)
+      ;; Use `record' instead of `make-aas-snippet' because writing the keys is
+      ;; annoying when I named my variables the same.
+      ;; Writing this comment on the other hand wasn't annoying at all.
+      snippet)
+    (puthash keymap-symbol keymap aas-keymaps)))
 
 (defun aas-set-snippets (name &rest args)
   "Define snippets for the keymap named NAME (usually a major or minor-mode name).
@@ -163,8 +195,7 @@ conditions and expansions are free to use the variables
 
 \(fn KEYMAP [:cond :expansion-desc] KEY-EXPANSIONS)"
   (declare (indent 1))
-  (let ((keymap (or (gethash name aas-keymaps) (make-sparse-keymap)))
-        item cond)
+  (let (item cond props)
     (while args
       (setq item (pop args))
       (if (keywordp item)
@@ -176,8 +207,10 @@ conditions and expansions are free to use the variables
         ;; regular key-expansion
         (let ((key item)
               (expansion (pop args)))
-          (aas-define-prefix-map-snippet keymap key expansion cond))))
-    (puthash name keymap aas-keymaps)))
+          (aas--bind-snippet
+           (record 'aas-snippet key expansion cond name props)))
+        ;; moving to next snippet definition. reset non-permanent props
+        (setq props nil)))))
 
 (defvar-local aas--prefix-map nil
   "Defalut full snippet keymap.")
@@ -212,11 +245,10 @@ Use for the typing history, `aas--current-prefix-maps' and
              (setcar current-map-sublist key-result)
              (setq prev current-map-sublist)
              (cl-callf cdr current-map-sublist))
-            ((functionp key-result)
-             ;; an ending! no need to call interactively,`aas-expand-snippet-maybe'
-             ;; takes care of that
-             (if (funcall key-result)
-                 ;; condition evaluated to true, and snippet expanded!
+            ((aas-snippet-p key-result)
+             ;; an ending!
+             (if (aas-expand-snippet-maybe key-result)
+                 ;; condition passed, and snippet expanded!
                  (setq current-map-sublist nil      ; stop the loop
                        aas--current-prefix-maps (list nil)) ; abort all other snippet
                ;; unseccesfull. remove dead end from the list
