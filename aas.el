@@ -324,11 +324,35 @@ This does not set any default keymaps. For that use
   "1.1" "This was a horrible typo of `aas-activate-for-major-mode', but it
 appeared in the readme for months.")
 
-(defun aas-embark-menu ()
+(completing-read "Test: " '(("a" "b" "c") ("d" "e" "f")))
+
+(setq aas-menu-completion-extra-properties
+      `(:affixiation-function
+        ,(lambda (snippets)
+           (message "called!")
+           (mapcar (lambda (s)
+                     (list (aas-snippet-key s)
+                           (let ((exp (aas-snippet-expansion s)))
+                             (cond ((stringp exp)
+                                    exp)
+                                   ((functionp exp)
+                                    (or (plist-get (aas-snippet-props s) :expansion-desc)
+                                        (documentation exp)
+                                        "Unknown function"))))
+                           (symbol-name (aas-snippet-keymap-symbol s)))))))
+      aoeu
+      "The variable bound to `completion-extra-properties' in `aas-menu'.")
+
+
+(defun aas-menu ()
   (interactive)
-  (when-let (command (embark-completing-read-prompter
-                      aas--prefix-map nil 'no-default))
-    (call-interactively command)))
+  (let* ((snippets (let ((res nil))
+                               (cl--map-keymap-recursively
+                                (lambda (_ snippet) (push snippet res))
+                                (gethash 'laas-mode aas-keymaps))
+                               res))
+         (completion-extra-properties aas-menu-completion-extra-properties))
+   (completing-read "Snippet: " snippets)))
 
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."
