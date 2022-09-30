@@ -324,35 +324,71 @@ This does not set any default keymaps. For that use
   "1.1" "This was a horrible typo of `aas-activate-for-major-mode', but it
 appeared in the readme for months.")
 
-(completing-read "Test: " '(("a" "b" "c") ("d" "e" "f")))
+(defun aas--mapcar-keymap-recursively (fn keymap)
+  "Run FN on keys and values of KEYMAP and collect the results in a list."
+  (let ((res nil))
+   (cl--map-keymap-recursively
+    (lambda (_k v) (push (funcall fn v) res))
+    keymap)
+   res))
+
+
+(defun aas--snippet-expansion-string (s)
+  "Return a string representation for the expansion of S."
+  (let ((exp (aas-snippet-expansion s)))
+    (cond ((stringp exp)
+           exp)
+          ((functionp exp)
+           (or (plist-get (aas-snippet-props s) :expansion-desc)
+               ;; Not dealing with formatting
+               ;; function docs right now
+               ;;(when-let ((doc (documentation exp)))
+               ;;  (if (> (length doc) 50)
+               ;;      (substring ( doc) 0 50)
+               ;;    doc))
+               "Unknown function")))))
+
+(defun aas--propertize-pad-spaces (s n &rest props)
+  (setq s (concat s (make-string (max (- n (length s)) 0) ?\ )))
+  (when props
+    (add-text-properties 0 (length s) props s))
+  s)
 
 (setq aas-menu-completion-extra-properties
-      `(:affixiation-function
+      `(:affixation-function
         ,(lambda (snippets)
-           (message "called!")
-           (mapcar (lambda (s)
-                     (list (aas-snippet-key s)
-                           (let ((exp (aas-snippet-expansion s)))
-                             (cond ((stringp exp)
-                                    exp)
-                                   ((functionp exp)
-                                    (or (plist-get (aas-snippet-props s) :expansion-desc)
-                                        (documentation exp)
-                                        "Unknown function"))))
-                           (symbol-name (aas-snippet-keymap-symbol s)))))))
+           (mapcar (lambda (k)
+                     (let ((s (lookup-key (gethash 'laas-mode aas-keymaps) k)))
+                       (list
+                        (aas--propertize-pad-spaces k 8)
+                        (aas--propertize-pad-spaces
+                         (aas--snippet-expansion-string s)
+                         50 'face 'font-lock-builtin-face)
+                        (aas--propertize-pad-spaces
+                         (symbol-name (aas-snippet-keymap-symbol s))
+                         20 'face 'font-lock-keyword-face))))
+                   snippets)))
       aoeu
       "The variable bound to `completion-extra-properties' in `aas-menu'.")
 
-
+(aas--mapcar-keymap-recursively
+ (lambda (a)
+   (message "a %s" a))
+ (gethash 'laas-mode aas-keymaps))
+(aas--mapcar-keymap-recursively
+                   (lambda (s)
+                     (message "type: %s" (type-of s)))
+                   (gethash 'laas-mode aas-keymaps))
 (defun aas-menu ()
   (interactive)
-  (let* ((snippets (let ((res nil))
-                               (cl--map-keymap-recursively
-                                (lambda (_ snippet) (push snippet res))
-                                (gethash 'laas-mode aas-keymaps))
-                               res))
+  (let* ((results (aas--mapcar-keymap-recursively
+                   (lambda (s)
+                     (concat
+                      (aas--snippet-expansion-string s)
+                      (aas-snippet-key s)))
+                   (gethash 'laas-mode aas-keymaps)))
          (completion-extra-properties aas-menu-completion-extra-properties))
-   (completing-read "Snippet: " snippets)))
+    (completing-read "Snippet: " results)))
 
 (defun aas--format-doc-to-org (thing)
   "Format documentation of THING in `org-mode' syntax."
