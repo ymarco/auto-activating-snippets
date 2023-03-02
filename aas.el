@@ -111,6 +111,7 @@ non-interactively."
                             (funcall condition)))
                   ;; go back to after the key
                   (forward-char (length key))))))
+    (undo-boundary)
     (delete-char (- (length key)))
     (run-hooks 'aas-pre-snippet-expand-hook)
     (if (functionp aas-transient-snippet-expansion)
