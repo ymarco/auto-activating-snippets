@@ -30,6 +30,11 @@
 
 (defgroup aas nil
   "Snippet expansions mid-typing."
+  :link '(url-link :tag "Homepage" "https://github.com/ymarco/auto-activating-snippets")
+  :link '(emacs-library-link :tag "Library Source" "aas.el")
+  :group 'abbrev
+  :group 'tools
+  :group 'matching
   :prefix "aas-")
 
 (defcustom aas-pre-snippet-expand-hook nil
