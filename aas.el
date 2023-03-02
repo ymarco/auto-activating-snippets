@@ -28,6 +28,8 @@
 
 (require 'cl-lib)
 
+(declare-function yas-expand-snippet "yasnippet")
+(declare-function tempel-insert "tempel")
 (declare-function embark-completing-read-prompter "embark")
 
 (defgroup aas nil
@@ -98,8 +100,11 @@ are valid, expand the snippet and return t. Otherwise return nil.
 
 CONDITION should not modify the buffer when called.
 
-EXPANTION is called interactively, and CONDITION
-non-interactively."
+If EXPANSION is a function, it is called interactively, a string
+value is `insert'ed into the buffer. EXPANSION can also take the
+form of a list with \"tempel\" or \"yas\" at the start, in which
+case the rest of the list will be provided to `tempel-insert' or
+`yas-expand-snippet', as appropriate."
   (when-let ((aas-transient-snippet-key key)
              (aas-transient-snippet-expansion expansion)
              (aas-transient-snippet-condition-result
@@ -116,19 +121,28 @@ non-interactively."
     (undo-boundary)
     (delete-char (- (length key)))
     (run-hooks 'aas-pre-snippet-expand-hook)
-    (if (functionp aas-transient-snippet-expansion)
-        (call-interactively aas-transient-snippet-expansion)
-      (insert aas-transient-snippet-expansion))
+    (pcase aas-transient-snippet-expansion
+      ((and (pred stringp) s)
+       (insert s))
+      ((and (pred functionp) f)
+       (call-interactively f))
+      (`(tempel . ,tsnip)
+       (tempel-insert tsnip))
+      (`(yas . ,ysnip)
+       (yas-expand-snippet ysnip))
+      (bad (error "Invalid AAS expansion form: %S" bad)))
     (run-hooks 'aas-post-snippet-expand-hook)
     t))
 
 (defun aas-define-prefix-map-snippet (keymap key expansion &optional condition)
   "Bind KEY (string) as extended prefix in KEYMAP to EXPANTION.
 
-EXPANTION must either be a string, an interactive function, or nil.
+EXPANTION must either be a string, an interactive function, nil,
+or a list starting with the symbol \"tempel\" or \"yas\".
 CONDITION must be nil or a function."
-  (unless (or (stringp expansion) (functionp expansion) (null expansion))
-    (error "Expansion must be either a string, function, or nil"))
+  (unless (or (stringp expansion) (functionp expansion) (null expansion)
+              (and (consp expansion) (memq (car expansion) `(tempel yas))))
+    (error "Expansion must be either a string, function, tempel/yas form, or nil"))
   (unless (or (null condition) (functionp condition))
     (error "Condition must be either nil or a function"))
   (define-key keymap key
