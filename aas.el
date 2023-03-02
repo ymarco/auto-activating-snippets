@@ -28,6 +28,8 @@
 
 (require 'cl-lib)
 
+(declare-function embark-completing-read-prompter "embark")
+
 (defgroup aas nil
   "Snippet expansions mid-typing."
   :link '(url-link :tag "Homepage" "https://github.com/ymarco/auto-activating-snippets")
