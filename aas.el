@@ -132,7 +132,7 @@ EXPANSION can be either:
       (`(tempel . ,tsnip)
        (tempel-insert tsnip))
       (`(yas . ,ysnip)
-       (yas-expand-snippet ysnip))
+       (apply #'yas-expand-snippet ysnip))
       (bad (error "Invalid AAS expansion form: %S" bad)))
     (run-hooks 'aas-post-snippet-expand-hook)
     t))
