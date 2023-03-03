@@ -86,8 +86,9 @@ If any evaluate to nil, do not expand the snippet."
   "Hash table of all snippet keymaps, in the format of symbol:keymap.")
 
 (defvar-local aas-active-keymaps nil
-  "List of symbols of the active keymaps. Each symbol should be
-present as a key in `aas-keymaps'.")
+  "List of symbols of the active keymaps.
+
+Each symbol should be a valid key in the hash table `aas-keymaps'.")
 
 (defun aas-expand-snippet-maybe (key expansion &optional condition)
   "Try to expand snippet with KEY to EXPANSION.
@@ -100,11 +101,13 @@ are valid, expand the snippet and return t. Otherwise return nil.
 
 CONDITION should not modify the buffer when called.
 
-If EXPANSION is a function, it is called interactively, a string
-value is `insert'ed into the buffer. EXPANSION can also take the
-form of a list with \"tempel\" or \"yas\" at the start, in which
-case the rest of the list will be provided to `tempel-insert' or
-`yas-expand-snippet', as appropriate."
+EXPANSION can be either:
+- A string
+- A function, which would be called interactively
+- A list with `yas' at the start, in which case the expansion
+  will call `yas-expand-snippet' on the rest of the list
+- A list with `tempel' at the start, in which case it will call
+  `tempel-insert'."
   (when-let ((aas-transient-snippet-key key)
              (aas-transient-snippet-expansion expansion)
              (aas-transient-snippet-condition-result
@@ -137,8 +140,12 @@ case the rest of the list will be provided to `tempel-insert' or
 (defun aas-define-prefix-map-snippet (keymap key expansion &optional condition)
   "Bind KEY (string) as extended prefix in KEYMAP to EXPANTION.
 
-EXPANTION must either be a string, an interactive function, nil,
-or a list starting with the symbol \"tempel\" or \"yas\".
+EXPANSION can be either:
+- A string
+- A function, which would be called interactively
+- A list with `yas' at the start, in which case the expansion
+  will call `yas-expand-snippet' on the rest of the list
+- A list with `tempel' at the start, in which case it will call
 CONDITION must be nil or a function."
   (unless (or (stringp expansion) (functionp expansion) (null expansion)
               (and (consp expansion) (memq (car expansion) `(tempel yas))))

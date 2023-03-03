@@ -39,28 +39,11 @@ Example configuration using [[https://github.com/jwiegley/use-package][use-packa
     "amin" '(yas "\\argmin_{$1}") ; YASnippet snippet shorthand form
     "amax" '(tempel "\\argmax_{" p "}") ; Tempel snippet shorthand form
     ;; bind to functions!
-    "//" #'my-double-slash-function
-    "solvedquad"
-    (lambda () ; Get as fancy as you like
-      (interactive)
-      (let* ((a (read-number "[?] x^2: "))
-             (b (read-number (format "%sx^2 + [?] x: " a )))
-             (c (read-number (format "%sx^2 + %sx + [?] = 0: " a b)))
-             (offset (- (/ b 2.0 a)))
-             (2agap^2 (- (* b b) (* 4 a c))))
-        (when (= 0 offset)
-          (setq offset ""))
-        (insert
-         (format "%sx^2 %s %sx %s %s = 0 \\implies x = %s"
-                 a (if (>= b 0) "+" "") b (if (>= c 0) "+" "") c
-                 (cond
-                  ((= 2agap^2 0) offset)
-                  ((> 2agap^2 0)
-                   (format "%s, %s"
-                           (+ offset (/ (sqrt 2agap^2) 2.0 a))
-                           (- offset (/ (sqrt 2agap^2) 2.0 a))))
-                  (t (format "%1$s + %2$si, %1$s - %2$si"
-                             offset (/ (sqrt (- 2agap^2)) 2.0 a))))))))
+    ";ig" #'insert-register
+    ";call-sin"
+    (lambda (angle) ; Get as fancy as you like
+      (interactive "sAngle: ")
+      (insert (format "%s" (sin (string-to-number angle))))))
   ;; disable snippets by redefining them with a nil expansion
   (aas-set-snippets 'latex-mode
     "supp" nil))
