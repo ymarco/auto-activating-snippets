@@ -224,37 +224,19 @@ Gets updated by `aas-post-self-insert-hook'.")
 
 Use for the typing history, `aas--current-prefix-maps' and
 `this-command-keys' for the current typed key.."
-  (cl-callf nconc (cdr aas--current-prefix-maps) (list aas--prefix-map))
-  (let ((current-map-sublist (cdr aas--current-prefix-maps))
-        (prev aas--current-prefix-maps)
-        current-map
-        key-result)
-    (while current-map-sublist
-      (setq current-map (car current-map-sublist)
-            key-result (lookup-key current-map (this-command-keys)))
-      (cond ((null key-result)
-             ;; remove dead end from the list
-             (cl-callf cdr current-map-sublist)
-             (setcdr prev current-map-sublist))
-            ((keymapp key-result)
-             ;; update tree
-             (setcar current-map-sublist key-result)
-             (setq prev current-map-sublist)
-             (cl-callf cdr current-map-sublist))
-            ((functionp key-result)
-             ;; an ending! no need to call interactively,`aas-expand-snippet-maybe'
-             ;; takes care of that
-             (if (funcall key-result)
-                 ;; condition evaluated to true, and snippet expanded!
-                 (setq current-map-sublist nil      ; stop the loop
-                       aas--current-prefix-maps (list nil)) ; abort all other snippet
-               ;; unseccesfull. remove dead end from the list
-               (cl-callf cdr current-map-sublist)
-               (setcdr prev current-map-sublist)))
-            ;; Make sure the loop progresses even in the face of odd output from
-            ;; `this-command-keys'
-            (t (cl-callf cdr current-map-sublist)
-               (setcdr prev current-map-sublist))))))
+  (cl-callf nconc aas--current-prefix-maps (list aas--prefix-map))
+  (cl-loop for candidate in-ref aas--current-prefix-maps do
+           (let ((key-result (lookup-key candidate (this-command-keys))))
+             (cond ((keymapp key-result)
+                    ;; Collect the keymap for the next call
+                    (setf candidate key-result))
+                   ((and (functionp key-result) (funcall key-result))
+                    ;; an ending! no need to call interactively,`aas-expand-snippet-maybe'
+                    ;; takes care of that. Clear the map so we start over next time.
+                    (cl-return (setq aas--current-prefix-maps nil)))
+                   (t
+                    (setf candidate nil))))
+           finally do (cl-callf2 delq nil aas--current-prefix-maps)))
 
 ;;;###autoload
 (defun aas-activate-keymap (keymap-symbol)
