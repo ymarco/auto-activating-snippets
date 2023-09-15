@@ -323,6 +323,7 @@ appeared in the readme for months.")
 
 (defun aas-embark-menu ()
   (interactive)
+  (require 'embark)
   (when-let (command (embark-completing-read-prompter
                       aas--prefix-map nil 'no-default))
     (call-interactively command)))
